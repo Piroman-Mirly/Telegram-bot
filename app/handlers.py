@@ -86,7 +86,7 @@ async def handle_table_league(callback: CallbackQuery):
     # Цикл for с enumerate вытаскивает из таблицы данные в формате (place, (id, name_club, wins, points))
     # Сам place является счетчиком места
     for place, rows in enumerate(places_in_table, start = 1):
-        id, name_club, points, wins = rows
+        club_id, name_club, points, wins = rows
         # Собираем в один массив итоговое сообщение, добавля новые клубы в каждом цикле
         lines.append(f"{place} | {name_club} | {wins} | {points}")
 
