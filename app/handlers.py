@@ -94,6 +94,7 @@ async def handle_table_league(callback: CallbackQuery):
         lines.append([str(place), name_club, str(wins), str(points)])
 
     # Считаем максимальную ширину каждой колонки
+    # Читается как: максимум по всем строкам длины i-й ячейки
     widths = [max(len(head[i]), max(len(line[i]) for line in lines)) for i in range(len(head))]
 
     # Функция форматирования строки с отступом
