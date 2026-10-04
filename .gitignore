@@ -1,0 +1,13 @@
+# Секреты
+config.py
+
+# Виртуальное окружение
+.venv/
+venv/
+
+# Кэш Python
+__pycache__/
+*.pyc
+
+# База данных
+db.sqlite3
