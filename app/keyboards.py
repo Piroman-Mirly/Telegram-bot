@@ -34,6 +34,7 @@ async def players(club_id):
 
     for player in all_players:
         all_players_kb.add(InlineKeyboardButton(text=player.nickname_player, callback_data=f"player_{player.id}"))
+    all_players_kb.add(InlineKeyboardButton(text='В меню выбора клубов', callback_data='check_all_club'))
     all_players_kb.add(InlineKeyboardButton(text='На главную', callback_data='return_to_player_mm'))
     # Возвращает всех игроков в клубе в виде кнопок
     return all_players_kb.adjust(1).as_markup()
