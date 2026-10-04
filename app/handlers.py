@@ -73,6 +73,26 @@ async def handle_check_current_club(callback: CallbackQuery):
                                             reply_markup= await kb.players(int(callback.data.split('_')[1])))
                                             # В функцию передается раделенный коллбек, из которого извлекается айди клуба
 
+# Коллбек отвечает за отрисовку таблицы в отсортированном виде
+@router.callback_query(F.data == "league_table")
+async def handle_table_league(callback: CallbackQuery):
+    await callback.answer()
+    # Из файла request данные о текущих местах клуба передаются в переменную
+    places_in_table = await request.get_data_for_table_clubs()
+
+    # Отправная точка для создания единого сообщения
+    lines = ["Место | Название | Кол-во побед | Кол-во очков"]
+
+    # Цикл for с enumerate вытаскивает из таблицы данные в формате (place, (id, name_club, wins, points))
+    # Сам place является счетчиком места
+    for place, rows in enumerate(places_in_table, start = 1):
+        id, name_club, points, wins = rows
+        # Собираем в один массив итоговое сообщение, добавля новые клубы в каждом цикле
+        lines.append(f"{place} | {name_club} | {wins} | {points}")
+
+    # Разделяем итоговый массив "переходом на новую строку" (\n)
+    message = "\n".join(lines)
 
 
 
+    await callback.message.edit_text(message, reply_markup=kb.return_to_mm)
