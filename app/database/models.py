@@ -44,7 +44,6 @@ class Coach(Base):
     id: Mapped[int] = mapped_column(primary_key=True) # Персональный айди всех тренеров
 
     telegram_id: Mapped[int] = mapped_column(BigInteger, nullable=False) # Телеграм айди тренера
-
     nickname_coach: Mapped[str] = mapped_column(String(50), unique=True, nullable=False) # Игровой ник тренера
 
 # Таблица со всей статистикой в матче

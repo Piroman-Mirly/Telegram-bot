@@ -35,7 +35,7 @@ async def cmd_start(message: Message, state: FSMContext):
 
 
 
-# Callbacks
+
 
 # Player statistic callback
 
@@ -43,7 +43,7 @@ async def cmd_start(message: Message, state: FSMContext):
 
 
 
-
+# Callbacks
 
 # Коллбек, котоырй отображает главное меню игрока / его профиль
 @router.callback_query(F.data == "return_to_player_mm")
