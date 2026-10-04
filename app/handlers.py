@@ -81,18 +81,35 @@ async def handle_table_league(callback: CallbackQuery):
     places_in_table = await request.get_data_for_table_clubs()
 
     # Отправная точка для создания единого сообщения
-    lines = ["Место | Название | Кол-во побед | Кол-во очков"]
+    head = ["Место", "Название", "Кол-во побед", "Кол-во очков"]
+
+    # Итоговое сообщение
+    lines = []
 
     # Цикл for с enumerate вытаскивает из таблицы данные в формате (place, (id, name_club, wins, points))
     # Сам place является счетчиком места
     for place, rows in enumerate(places_in_table, start = 1):
         club_id, name_club, points, wins = rows
-        # Собираем в один массив итоговое сообщение, добавля новые клубы в каждом цикле
-        lines.append(f"{place} | {name_club} | {wins} | {points}")
+        # Собираем в один массив данные клубов добавля новые клубы в каждом цикле
+        lines.append([str(place), name_club, str(wins), str(points)])
+
+    # Считаем максимальную ширину каждой колонки
+    widths = [max(len(head[i]), max(len(line[i]) for line in lines)) for i in range(len(head))]
+
+    # Функция форматирования строки с отступом
+    def format_lines(cells):
+        return " | ".join(cell.ljust(widths[i]) for i, cell in enumerate(cells))
+
+    # Собирается сообщение
+    all_lines = [format_lines(head)]
+    for line in lines:
+        all_lines.append(format_lines(line))
+
+    
 
     # Разделяем итоговый массив "переходом на новую строку" (\n)
-    message = "\n".join(lines)
+    message = "<pre>" + "\n".join(all_lines) + "</pre>"
 
 
 
-    await callback.message.edit_text(message, reply_markup=kb.return_to_mm)
+    await callback.message.edit_text(message, reply_markup=kb.return_to_mm, parse_mode="HTML")
