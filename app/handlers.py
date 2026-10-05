@@ -45,7 +45,7 @@ async def cmd_start(message: Message, state: FSMContext):
 
 # Callbacks
 
-# Коллбек, котоырй отображает главное меню игрока / его профиль
+# Коллбек, который отображает главное меню игрока / его профиль
 @router.callback_query(F.data == "return_to_player_mm")
 async def handle_return_to_player_mm(callback : CallbackQuery):
     await callback.answer()
@@ -89,7 +89,7 @@ async def handle_table_league(callback: CallbackQuery):
     # Цикл for с enumerate вытаскивает из таблицы данные в формате (place, (id, name_club, wins, points))
     # Сам place является счетчиком места
     for place, rows in enumerate(places_in_table, start = 1):
-        club_id, name_club, points, wins = rows
+        _, name_club, points, wins = rows
         # Собираем в один массив данные клубов добавля новые клубы в каждом цикле
         lines.append([str(place), name_club, str(wins), str(points)])
 
@@ -106,11 +106,27 @@ async def handle_table_league(callback: CallbackQuery):
     for line in lines:
         all_lines.append(format_lines(line))
 
-    
-
     # Разделяем итоговый массив "переходом на новую строку" (\n)
     message = "<pre>" + "\n".join(all_lines) + "</pre>"
 
-
-
     await callback.message.edit_text(message, reply_markup=kb.return_to_mm, parse_mode="HTML")
+
+# Коллбек отвечает за вывод статистики пользователя как игрока
+@router.callback_query(F.data == 'statistic_main_player')
+async def handle_statistic_main_player(callback: CallbackQuery):
+    # Инициализируем переменные для подсчёта статистики в оперативной памяти
+    point_per_attack = 0
+    point_per_block = 0
+    point_per_serve = 0
+
+
+    # Данные о всех матчах игрока передаются в переменную
+    all_stat_matches = await request.get_all_points_player(callback.from_user.id)
+
+
+
+    await callback.answer()
+    await callback.message.edit_text(f'Ваша статистика:'
+                                     f'\nАтака: {all_stat_matches[0]}'
+                                     f'\nБлок: {all_stat_matches[1]}'
+                                     f'\nПодача: {all_stat_matches[2]}', reply_markup=kb.return_to_mm)

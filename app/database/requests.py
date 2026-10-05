@@ -33,7 +33,7 @@ async def get_statistic_current_player(tg_id):
 
         return all_data_current_player
 
-# Функция отдает отсортированную по очкам таблицу с клубами
+# Функция возвращает отсортированную по очкам таблицу с клубами
 async def get_data_for_table_clubs():
     async with async_session() as session:
         # Создаю промежуточную таблицу в формате id_клуба - кол-во побед
@@ -55,3 +55,23 @@ async def get_data_for_table_clubs():
         # Вернёт таблицу в формате: id, name_club, wins, points
         result = await session.execute(query)
         return result.all()
+
+# Функция возвращает суммарную статистику игрока
+async def get_all_points_player(tg_id):
+    async with async_session() as session:
+        # Промежуточный массив, который будет содержать в себе 3 значения: сумма атаки, блока и подач
+        all_point_array = []
+        # Получаем айди игрока с помощью тг айди
+        id_player = await session.scalar(select(Player.id).where(Player.telegram_id == tg_id))
+        # Используем айди игрока, чтобы получить данные о всех его матчах
+        sum_attack = select(func.sum(Statistic_per_match.attack_per_match)).where(Statistic_per_match.player_id == id_player)
+        all_point_array.append((await session.execute(sum_attack)).scalar())
+        # Очки за блок
+        sum_block = select(func.sum(Statistic_per_match.block_per_match)).where(Statistic_per_match.player_id == id_player)
+        all_point_array.append((await session.execute(sum_block)).scalar())
+        # Очки за подачу
+        sum_serve = select(func.sum(Statistic_per_match.serve_per_match)).where(Statistic_per_match.player_id == id_player)
+        # Массив со всей суммой очков
+        all_point_array.append((await session.execute(sum_serve)).scalar())
+        return all_point_array
+    

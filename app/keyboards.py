@@ -7,7 +7,7 @@ from app.database.requests import get_all_clubs, get_all_players_in_club
 
 # Кнопки в профиле игрока
 player_kb = InlineKeyboardMarkup(inline_keyboard=[
-    [InlineKeyboardButton(text='Главное меню', callback_data='return_to_player_mm')], [InlineKeyboardButton(text='Клубы', callback_data='check_all_club')], [InlineKeyboardButton(text='Таблица', callback_data='league_table')]
+    [InlineKeyboardButton(text='Статистика', callback_data='statistic_main_player')], [InlineKeyboardButton(text='Клубы', callback_data='check_all_club')], [InlineKeyboardButton(text='Таблица', callback_data='league_table')]
 ])
 
 # Кнопка возвращает в главный экран игрока
