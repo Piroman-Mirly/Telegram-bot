@@ -52,3 +52,23 @@ I tried to create a small logical diagram for the MVP of my bot, and here it is:
 1. Сделать трансферный рынок — У меня уже есть колонка "transfer_status" в таблице "players" моей БД. Теперь нужно создать отдельное окно трансферного рынка с пагинацией и возможностью сортировать игроков по трансферному статусу и роли.
 2. Возможность вести детальный счёт статистики + детальный просмотр матча — Админ-панель в моих планах выполняет простенькие задачи: записать кол-во очков конкретного игрока за матч и сохранить эти данные в БД. Однако, если я хочу, чтобы статистика матча выглядела красиво, то, как минимум, ко всему этому нужно добавить счёт очков по отдельным партиям.
    
+<h1>Работа бота</h1>
+
+Команда старт:
+<img width="1088" height="173" alt="image" src="https://github.com/user-attachments/assets/7db6a4a4-8230-4c7b-be92-da0667c14041" />
+
+Выбор кнопки "На главную":
+<img width="1195" height="293" alt="image" src="https://github.com/user-attachments/assets/52d7b6f0-d1eb-4053-935a-8393e9a42070" />
+Кнопка "Главное меню" будет переделана
+
+Выбор кнопки "Клубы":
+<img width="1184" height="197" alt="image" src="https://github.com/user-attachments/assets/7a63f62b-c5ea-4dcc-8baa-0669ad373d14" />
+После выбора конкретного клуба видим следующее:
+<img width="1193" height="305" alt="image" src="https://github.com/user-attachments/assets/93447474-f01c-438c-9947-15e85a684364" />
+"В меню выбора клубов" возвращает пользователя в меню, где он выбирал клубы, а "На главную" возвращает обратно на экран статистики игрока.
+
+Если в клубе нет игроков:
+<img width="1186" height="214" alt="image" src="https://github.com/user-attachments/assets/8a0cfbbd-a366-4937-97e3-b4dd631483c0" />
+Кнопка "Таблица" в главном меню:
+<img width="1192" height="272" alt="image" src="https://github.com/user-attachments/assets/7ac899e8-1cba-4afd-a08b-a7b0bd35fbff" />
+
