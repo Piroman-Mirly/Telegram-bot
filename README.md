@@ -58,7 +58,8 @@ I tried to create a small logical diagram for the MVP of my bot, and here it is:
 <img width="1088" height="173" alt="image" src="https://github.com/user-attachments/assets/7db6a4a4-8230-4c7b-be92-da0667c14041" />
 
 Выбор кнопки "На главную":
-<img width="1195" height="293" alt="image" src="https://github.com/user-attachments/assets/52d7b6f0-d1eb-4053-935a-8393e9a42070" />
+<img width="1193" height="323" alt="image" src="https://github.com/user-attachments/assets/535c66b8-9e18-4915-b963-d035bc1166e9" />
+
 Кнопка "Главное меню" будет переделана
 
 Выбор кнопки "Клубы":
@@ -71,4 +72,6 @@ I tried to create a small logical diagram for the MVP of my bot, and here it is:
 <img width="1186" height="214" alt="image" src="https://github.com/user-attachments/assets/8a0cfbbd-a366-4937-97e3-b4dd631483c0" />
 Кнопка "Таблица" в главном меню:
 <img width="1192" height="272" alt="image" src="https://github.com/user-attachments/assets/7ac899e8-1cba-4afd-a08b-a7b0bd35fbff" />
-
+Кнопка "Статистика" в главном меню:
+<img width="1179" height="232" alt="image" src="https://github.com/user-attachments/assets/5410c0ff-21a7-404b-8a08-5721ea0b8fd9" />
+Результаты этой кнопки складываются со всех матчей
