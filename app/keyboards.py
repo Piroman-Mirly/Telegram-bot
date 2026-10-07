@@ -15,6 +15,12 @@ return_to_mm = InlineKeyboardMarkup(inline_keyboard=[
     [InlineKeyboardButton(text='На главную', callback_data='return_to_player_mm')]
 ])
 
+# Кнопки для админ-панели
+admin_buttons = InlineKeyboardMarkup(inline_keyboard=[
+    [InlineKeyboardButton(text='Добавить статистику матча', callback_data='add_statistic_for_match')],
+    [InlineKeyboardButton(text='Выйти из админ-панели',callback_data='return_to_player_state')]
+])
+
 
 # Билдер, создающий кнопки из N количества данных
 async def clubs(): # В данном случае билдер создает кнопки клубов

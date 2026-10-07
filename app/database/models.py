@@ -67,13 +67,17 @@ class Match(Base):
     id: Mapped[int] = mapped_column(primary_key=True) # Персональный айди всех матчей
 
     date_match: Mapped[date] = mapped_column(Date, nullable=False)  # Дата матча
-    winner_id: Mapped[int] = mapped_column(ForeignKey('clubs.id')) # Айди победителя в матче
+    winner_id: Mapped[int] = mapped_column(ForeignKey('clubs.id'), nullable=True) # Айди победителя в матче
 
     left_club_id: Mapped[int] = mapped_column(ForeignKey('clubs.id')) # Айди клуба дома
     right_club_id: Mapped[int] = mapped_column(ForeignKey('clubs.id')) # Айди клуба на выезде
 
-    score_left: Mapped[int] = mapped_column(nullable=False) # Счёт по партиям левого клуба
-    score_right: Mapped[int] = mapped_column(nullable=False) # Счёт по партиям правого клуба
+    score_left: Mapped[int] = mapped_column(nullable=True) # Счёт по партиям левого клуба
+    score_right: Mapped[int] = mapped_column(nullable=True) # Счёт по партиям правого клуба
+
+    status: Mapped[str] = mapped_column(String(32), nullable=False) # Статус матча: заполнен ли матч
+    # "scheduled" — создан, но не сыгран
+    # "finished"  — есть статистика, посчитан победитель
 
 
 # Класс тех, кто хоть раз зашёл в бота и нажал кнопку старта

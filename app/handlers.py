@@ -1,7 +1,7 @@
 import asyncio
 import logging
 from aiogram import F, Router
-from aiogram.filters import CommandStart, Command
+from aiogram.filters import CommandStart, Command, StateFilter
 from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.fsm.context import FSMContext
@@ -11,14 +11,39 @@ import app.database.requests as request
 
 import app.keyboards as kb
 
+from config import ADMIN
+
 
 router = Router()
 
 router.message.middleware(TestMiddleware())
 
-# FSM состояния
-class Join(StatesGroup):
-    pass
+# FSM состояния админ-панели
+class Admin(StatesGroup):
+    # Общие статусы
+    make_choice = State() # Делает выбор команды перед заходом в админку
+    in_admin = State() # Находится в самой админ панеле
+
+    # Статусы для главного админа, доступ к которым даётся конкретному тг-айди
+    add_left_club = State() # Добавил первый клуб в матче
+    add_right_club = State() # Добавил второй клуб в матче
+    add_date = State() # Добавил дату матча
+
+    # Статусы для обычного судьи
+    picking_match = State() # Судья выбрал матч
+    picking_club = State() # Судья выбрал клуб
+    picking_player = State() # Судья выбрал конкретного игрока
+    entering_stats = State() # Судья ввёл значения статистики конкретному игроку
+    confirming_match = State() # Судья подтвердил значения 
+
+    
+    
+    
+    
+    
+    
+    
+
 
 
 # Комманда старт
@@ -130,3 +155,9 @@ async def handle_statistic_main_player(callback: CallbackQuery):
                                      f'\nАтака: {all_stat_matches[0]}'
                                      f'\nБлок: {all_stat_matches[1]}'
                                      f'\nПодача: {all_stat_matches[2]}', reply_markup=kb.return_to_mm)
+
+@router.message(F.text == ADMIN)
+async def admin_panel(message: Message, state: FSMContext):
+    await message.delete()
+    await message.answer('Вы в админ-панеле, выберите действие.', reply_markup=kb.admin_buttons)
+    await state.set_state(Admin.make_choice)
