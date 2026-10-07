@@ -25,6 +25,11 @@ async def get_all_players_in_club(club_id):
         players = await session.scalars(select(Player).where(Player.club_id == club_id))
         return players
 
+# Функция получает на вход телеграмм айди игрока, а возвращает его обычное айди
+async def get_player_id(telegram_id):
+    async with async_session() as session:
+        player_id = await session.scalar(select(Player.id).where(Player.telegram_id == telegram_id))
+        return player_id
 
 # Функция передает все данные конкретного игрока игрока с помощью полученного тг-айди
 async def get_statistic_current_player(tg_id):
@@ -57,20 +62,18 @@ async def get_data_for_table_clubs():
         return result.all()
 
 # Функция возвращает суммарную статистику игрока
-async def get_all_points_player(tg_id):
+async def get_all_points_player(player_id):
     async with async_session() as session:
         # Промежуточный массив, который будет содержать в себе 3 значения: сумма атаки, блока и подач
         all_point_array = []
-        # Получаем айди игрока с помощью тг айди
-        id_player = await session.scalar(select(Player.id).where(Player.telegram_id == tg_id))
         # Используем айди игрока, чтобы получить данные о всех его матчах
-        sum_attack = select(func.sum(Statistic_per_match.attack_per_match)).where(Statistic_per_match.player_id == id_player)
+        sum_attack = select(func.sum(Statistic_per_match.attack_per_match)).where(Statistic_per_match.player_id == player_id)
         all_point_array.append((await session.execute(sum_attack)).scalar())
         # Очки за блок
-        sum_block = select(func.sum(Statistic_per_match.block_per_match)).where(Statistic_per_match.player_id == id_player)
+        sum_block = select(func.sum(Statistic_per_match.block_per_match)).where(Statistic_per_match.player_id == player_id)
         all_point_array.append((await session.execute(sum_block)).scalar())
         # Очки за подачу
-        sum_serve = select(func.sum(Statistic_per_match.serve_per_match)).where(Statistic_per_match.player_id == id_player)
+        sum_serve = select(func.sum(Statistic_per_match.serve_per_match)).where(Statistic_per_match.player_id == player_id)
         # Массив со всей суммой очков
         all_point_array.append((await session.execute(sum_serve)).scalar())
         return all_point_array

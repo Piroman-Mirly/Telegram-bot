@@ -54,7 +54,12 @@ async def cmd_start(message: Message, state: FSMContext):
     # Реализовать одобрение входа / функцию входа, чтобы статистику могли видеть только зарегестрированные пользователи
     # await message.answer('Добро пожаловать, новичок. \nОбновите бота, чтобы использовать весь его функционал')
 
-        
+# Админ-панель
+@router.message(F.text == ADMIN)
+async def admin_panel(message: Message, state: FSMContext):
+    await message.delete()
+    await message.answer('Вы в админ-панеле, выберите действие.', reply_markup=kb.admin_buttons)
+    await state.set_state(Admin.make_choice)     
     
 
 
@@ -69,6 +74,14 @@ async def cmd_start(message: Message, state: FSMContext):
 
 
 # Callbacks
+
+# Коллбек, который выводит пользователя из состояния админа
+@router.callback_query(F.data == 'return_to_player_state')
+async def handle_out_of_admin_panel(callback: CallbackQuery, state: FSMContext):
+    await state.clear()
+    await callback.answer()
+    await callback.message.edit_text('Вы вышли из админ-панели', reply_markup=kb.return_to_mm)
+
 
 # Коллбек, который отображает главное меню игрока / его профиль
 @router.callback_query(F.data == "return_to_player_mm")
@@ -95,8 +108,8 @@ async def handle_check_all_club(callback: CallbackQuery):
 async def handle_check_current_club(callback: CallbackQuery):
     await callback.answer()
     await callback.message.edit_text(f'Игроки, играющие в этом клубе:',
-                                            reply_markup= await kb.players(int(callback.data.split('_')[1])))
-                                            # В функцию передается раделенный коллбек, из которого извлекается айди клуба
+                                            reply_markup= await kb.players(int(callback.data.split('_')[-1])))
+                                            # В функцию передается разделенный коллбек, из которого извлекается айди клуба
 
 # Коллбек отвечает за отрисовку таблицы в отсортированном виде
 @router.callback_query(F.data == "league_table")
@@ -144,9 +157,10 @@ async def handle_statistic_main_player(callback: CallbackQuery):
     point_per_block = 0
     point_per_serve = 0
 
-
+    # Находим айди пользователя через его тг-айди
+    player_id = await request.get_player_id(callback.from_user.id)
     # Данные о всех матчах игрока передаются в переменную
-    all_stat_matches = await request.get_all_points_player(callback.from_user.id)
+    all_stat_matches = await request.get_all_points_player(player_id)
 
 
 
@@ -156,8 +170,22 @@ async def handle_statistic_main_player(callback: CallbackQuery):
                                      f'\nБлок: {all_stat_matches[1]}'
                                      f'\nПодача: {all_stat_matches[2]}', reply_markup=kb.return_to_mm)
 
-@router.message(F.text == ADMIN)
-async def admin_panel(message: Message, state: FSMContext):
-    await message.delete()
-    await message.answer('Вы в админ-панеле, выберите действие.', reply_markup=kb.admin_buttons)
-    await state.set_state(Admin.make_choice)
+# Колбек отвечает за вывод статистики выбранного пользователем игрока
+@router.callback_query(F.data.startswith('player_'))
+async def hundle_check_statistic_current_player(callback: CallbackQuery):
+    # Инициализируем переменные для подсчёта статистики в оперативной памяти
+    point_per_attack = 0
+    point_per_block = 0
+    point_per_serve = 0
+
+    # Айди игрока передается через коллбек в переменную
+    player_id = int(callback.data.split('_')[-1])
+    # Данные о всех матчах игрока передаются в переменную
+    all_stat_matches = await request.get_all_points_player(player_id)
+
+
+    await callback.answer()
+    await callback.message.edit_text(f'Статистика этого игрока:'
+                                        f'\nАтака: {all_stat_matches[0]}'
+                                        f'\nБлок: {all_stat_matches[1]}'
+                                        f'\nПодача: {all_stat_matches[2]}', reply_markup=kb.return_to_mm)
