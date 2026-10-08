@@ -3,7 +3,7 @@ from aiogram.types import (ReplyKeyboardMarkup, KeyboardButton,
 
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 
-from app.database.requests import get_all_clubs, get_all_players_in_club
+from app.database.requests import get_all_clubs, get_all_players_in_club, get_all_matches, get_name_club
 
 # Кнопки в профиле игрока
 player_kb = InlineKeyboardMarkup(inline_keyboard=[
@@ -16,10 +16,14 @@ return_to_mm = InlineKeyboardMarkup(inline_keyboard=[
 ])
 
 # Кнопки для админ-панели
+# Для главного экрана
 admin_buttons = InlineKeyboardMarkup(inline_keyboard=[
-    [InlineKeyboardButton(text='Добавить статистику матча', callback_data='add_statistic_for_match')],
+    [InlineKeyboardButton(text='Добавить статистику матча', callback_data='on_statistic_for_match')],
     [InlineKeyboardButton(text='Выйти из админ-панели',callback_data='return_to_player_state')]
 ])
+
+
+
 
 
 # Билдер, создающий кнопки из N количества данных
@@ -44,3 +48,18 @@ async def players(club_id):
     all_players_kb.add(InlineKeyboardButton(text='На главную', callback_data='return_to_player_mm'))
     # Возвращает всех игроков в клубе в виде кнопок
     return all_players_kb.adjust(1).as_markup()
+
+# Билдер, создающий список всех матчей в виде кнопок
+async def matches():
+    all_matches = await get_all_matches() # Взято из request
+    all_matches_kb = InlineKeyboardBuilder()
+
+    for match in all_matches:
+        left_name_club = await get_name_club(match.left_club_id) # Возвращает имя клуба слева
+        right_name_club = await get_name_club(match.right_club_id) # Возвращает имя клуба справа
+        all_matches_kb.add(InlineKeyboardButton(text=f'{match.id}.'
+                                                f'{left_name_club} {match.score_left} - {match.score_right} {right_name_club}',
+                                                callback_data=f'match_{match.id}'))
+    # Для возможности вернуться в окно выбора матча
+    #all_matches_kb.add(InlineKeyboardButton(text='Вернуться к выбору матча', callback_data='on_statistic_for_match'))
+    return all_matches_kb.adjust(1).as_markup()

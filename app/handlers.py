@@ -75,6 +75,13 @@ async def admin_panel(message: Message, state: FSMContext):
 
 # Callbacks
 
+# Коллбек, который даёт админу ввести значения матча
+@router.callback_query(F.data == 'on_statistic_for_match')
+async def hundle_add_player_statistic(callback: CallbackQuery, state: FSMContext):
+    await state.set_state(Admin.in_admin)
+    await callback.answer()
+    await callback.message.edit_text('Выберите подходящий матч.', reply_markup=await kb.matches())
+
 # Коллбек, который выводит пользователя из состояния админа
 @router.callback_query(F.data == 'return_to_player_state')
 async def handle_out_of_admin_panel(callback: CallbackQuery, state: FSMContext):
