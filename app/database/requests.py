@@ -20,7 +20,7 @@ async def get_all_clubs(): # Функция передает данные все
 
 async def get_name_club(club_id): # Функция возвращает название конкретного клуба
     async with async_session() as session:
-        return await session.scalars(select(Club.name_club).where(Club.id == club_id))
+        return await session.scalar(select(Club.name_club).where(Club.id == club_id))
 
 
 # Функция получает на вход айди клуба и сравнивает его со всеми игроками, после чего возвращает всех найденных игроков клуба
@@ -82,6 +82,8 @@ async def get_all_points_player(player_id):
         all_point_array.append((await session.execute(sum_serve)).scalar())
         return all_point_array
 
+# Функция возвращает все матчи
 async def get_all_matches():
     async with async_session() as session:
-        return await session.scalars(select(Match))
+        result = await session.scalars(select(Match))
+        return result.all()
