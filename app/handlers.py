@@ -20,6 +20,8 @@ router.message.middleware(TestMiddleware())
 
 # FSM состояния админ-панели
 class Admin(StatesGroup):
+    # Статус, чтобы удалять весь мусор в сообщениях
+    normal = State()
     # Общие статусы
     make_choice = State() # Делает выбор команды перед заходом в админку
     in_admin = State() # Находится в самой админ панеле
@@ -54,12 +56,19 @@ async def cmd_start(message: Message, state: FSMContext):
     # Реализовать одобрение входа / функцию входа, чтобы статистику могли видеть только зарегестрированные пользователи
     # await message.answer('Добро пожаловать, новичок. \nОбновите бота, чтобы использовать весь его функционал')
 
+    await state.set_state(Admin.normal)
+
 # Админ-панель
 @router.message(F.text == ADMIN)
 async def admin_panel(message: Message, state: FSMContext):
     await message.delete()
     await message.answer('Вы в админ-панеле, выберите действие.', reply_markup=kb.admin_buttons)
-    await state.set_state(Admin.make_choice)     
+    await state.set_state(Admin.make_choice)   
+
+# Удаляет все сообщения, написанные в боте
+@router.message(Admin.normal)
+async def delete_all_message(message: Message, state: FSMContext):
+    await message.delete()
     
 
 
@@ -85,7 +94,7 @@ async def hundle_add_player_statistic(callback: CallbackQuery, state: FSMContext
 # Коллбек, который выводит пользователя из состояния админа
 @router.callback_query(F.data == 'return_to_player_state')
 async def handle_out_of_admin_panel(callback: CallbackQuery, state: FSMContext):
-    await state.clear()
+    await state.set_state(Admin.normal)
     await callback.answer()
     await callback.message.edit_text('Вы вышли из админ-панели', reply_markup=kb.return_to_mm)
 
