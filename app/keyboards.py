@@ -27,15 +27,25 @@ admin_buttons = InlineKeyboardMarkup(inline_keyboard=[
 
 
 # Билдер, создающий кнопки из N количества данных
-async def clubs(): # В данном случае билдер создает кнопки клубов
-    all_clubs = await get_all_clubs() # Взято из request, присваивает в качестве значения все клубы из БД
+async def clubs(clubs): # В данном случае билдер создает кнопки клубов
+    all_clubs = clubs # На вход подаются строки клуба
     all_clubs_kb = InlineKeyboardBuilder()
 
     for club in all_clubs:
         all_clubs_kb.add(InlineKeyboardButton(text=club.name_club, callback_data=f"club_{club.id}"))
-    all_clubs_kb.add(InlineKeyboardButton(text='На главную', callback_data='return_to_player_mm'))
+    # Если клуба два, то запрос идёт из админки и нужно дать другую кнопку для возврата в меню
+    if len(clubs) == 2:
+        all_clubs_kb.add(InlineKeyboardButton(text='К выбору клуба', callback_data='on_statistic_for_match'))
+    else:
+        all_clubs_kb.add(InlineKeyboardButton(text='На главную', callback_data='return_to_player_mm'))
     # Возвращает все клубы в виде кнопок
     return all_clubs_kb.adjust(2).as_markup() # adjust отвечает за то, сколько кнопок будет в одном ряду
+
+# Создает кнопки из двух нужныъ клубов, которые участвовали в матче
+async def clubs_in_match(id_left_club, id_right_club):
+    button_clubs = InlineKeyboardBuilder()
+
+
 
 # Билдер, создающий кнопки из игроков
 async def players(club_id):

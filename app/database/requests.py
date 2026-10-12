@@ -87,3 +87,16 @@ async def get_all_matches():
     async with async_session() as session:
         result = await session.scalars(select(Match))
         return result.all()
+
+# Функция возвращает айди двух клубов
+async def get_two_club_id_in_match(match_id):
+    async with async_session() as session:
+        # Айди извлекаются напрямую из нужного матча
+        left_id = await session.scalar(select(Match.left_club_id).where(Match.id == match_id))
+        right_id = await session.scalar(select(Match.right_club_id).where(Match.id == match_id))
+
+        left_club = await session.get(Club, left_id)
+        right_club = await session.get(Club, right_id)
+
+        pair = (left_club, right_club)
+        return pair

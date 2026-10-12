@@ -5,6 +5,8 @@ from aiogram.filters import CommandStart, Command, StateFilter
 from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.fsm.context import FSMContext
+from aiogram.types import (ReplyKeyboardMarkup, KeyboardButton,
+                           InlineKeyboardMarkup, InlineKeyboardButton)
 
 from app.middlewares import TestMiddleware
 import app.database.requests as request
@@ -116,11 +118,13 @@ async def handle_return_to_player_mm(callback : CallbackQuery):
 @router.callback_query(F.data == "check_all_club")
 async def handle_check_all_club(callback: CallbackQuery):
     await callback.answer()
+    # Присваиваем кнопки клубов
+    buttons = await kb.clubs(await request.get_all_clubs()) # Взято из request, передает все клубы прямиком из БД
     await callback.message.edit_text(f'Выберите необходимый клуб',
-                                        reply_markup=await kb.clubs())
+                                        reply_markup=buttons)
 
 # Показывает всех игроков в данном клубе
-@router.callback_query(F.data.startswith('club_'))
+@router.callback_query(F.data.startswith('club_'), StateFilter(Admin.normal)) # Сработает только в состоянии normal
 async def handle_check_current_club(callback: CallbackQuery):
     await callback.answer()
     await callback.message.edit_text(f'Игроки, играющие в этом клубе:',
@@ -205,3 +209,21 @@ async def hundle_check_statistic_current_player(callback: CallbackQuery):
                                         f'\nАтака: {all_stat_matches[0]}'
                                         f'\nБлок: {all_stat_matches[1]}'
                                         f'\nПодача: {all_stat_matches[2]}', reply_markup=kb.return_to_mm)
+
+
+
+# Добавление статистики в конкретный матч
+@router.callback_query(F.data.startswith('match_'))
+async def handle_add_statis_in_current_match(callback: CallbackQuery, state: FSMContext):
+    await state.set_state(Admin.picking_match)
+
+    await callback.answer()
+
+    # Достает объекты клубов из айди матча
+    clubs = await request.get_two_club_id_in_match(int(callback.data.split('_')[-1]))
+
+    # Кнопки клубов
+    buttons = await kb.clubs(clubs) # Клубы передаются в билдер кнопок
+
+
+    await callback.message.edit_text('Выберите клуб, статистику игроков которых вы желаете внести:', reply_markup=buttons)
