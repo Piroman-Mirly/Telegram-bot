@@ -41,7 +41,7 @@ async def clubs(clubs): # В данном случае билдер создае
     # Возвращает все клубы в виде кнопок
     return all_clubs_kb.adjust(2).as_markup() # adjust отвечает за то, сколько кнопок будет в одном ряду
 
-# Создает кнопки из двух нужныъ клубов, которые участвовали в матче
+# Создает кнопки из двух нужных клубов, которые участвовали в матче
 async def clubs_in_match(id_left_club, id_right_club):
     button_clubs = InlineKeyboardBuilder()
 
