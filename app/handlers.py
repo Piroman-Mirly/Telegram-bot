@@ -5,8 +5,7 @@ from aiogram.filters import CommandStart, Command, StateFilter
 from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.fsm.context import FSMContext
-from aiogram.types import (ReplyKeyboardMarkup, KeyboardButton,
-                           InlineKeyboardMarkup, InlineKeyboardButton)
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from app.middlewares import TestMiddleware
 import app.database.requests as request
@@ -26,7 +25,6 @@ class Admin(StatesGroup):
     normal = State()
     # Общие статусы
     make_choice = State() # Делает выбор команды перед заходом в админку
-    in_admin = State() # Находится в самой админ панеле
 
     # Статусы для главного админа, доступ к которым даётся конкретному тг-айди
     add_left_club = State() # Добавил первый клуб в матче
@@ -89,7 +87,7 @@ async def delete_all_message(message: Message, state: FSMContext):
 
 
 # Коллбек, который отображает главное меню игрока / его профиль
-@router.callback_query(F.data == "return_to_player_mm")
+@router.callback_query(F.data == "return_to_player_mm", StateFilter(Admin.normal))
 async def handle_return_to_player_mm(callback : CallbackQuery):
     await callback.answer()
     data_player = await request.get_statistic_current_player(callback.from_user.id)
@@ -102,7 +100,7 @@ async def handle_return_to_player_mm(callback : CallbackQuery):
                                      reply_markup=kb.player_kb)
 
 # Отображает все клубы в виде Inline кнопок
-@router.callback_query(F.data == "check_all_club")
+@router.callback_query(F.data == "check_all_club", StateFilter(Admin.normal))
 async def handle_check_all_club(callback: CallbackQuery):
     await callback.answer()
     # Присваиваем кнопки клубов
@@ -112,7 +110,7 @@ async def handle_check_all_club(callback: CallbackQuery):
 
 
 # Коллбек отвечает за отрисовку таблицы в отсортированном виде
-@router.callback_query(F.data == "league_table")
+@router.callback_query(F.data == "league_table", StateFilter(Admin.normal))
 async def handle_table_league(callback: CallbackQuery):
     await callback.answer()
     # Из файла request данные о текущих местах клуба передаются в переменную
@@ -150,7 +148,7 @@ async def handle_table_league(callback: CallbackQuery):
     await callback.message.edit_text(message, reply_markup=kb.return_to_mm, parse_mode="HTML")
 
 # Коллбек отвечает за вывод статистики пользователя как игрока
-@router.callback_query(F.data == 'statistic_main_player')
+@router.callback_query(F.data == 'statistic_main_player', StateFilter(Admin.normal))
 async def handle_statistic_main_player(callback: CallbackQuery):
     # Инициализируем переменные для подсчёта статистики в оперативной памяти
     point_per_attack = 0
@@ -171,7 +169,7 @@ async def handle_statistic_main_player(callback: CallbackQuery):
                                      f'\nПодача: {all_stat_matches[2]}', reply_markup=kb.return_to_mm)
 
 # Колбек отвечает за вывод статистики выбранного пользователем игрока
-@router.callback_query(F.data.startswith('player_'))
+@router.callback_query(F.data.startswith('player_'), StateFilter(Admin.normal))
 async def hundle_check_statistic_current_player(callback: CallbackQuery):
     # Инициализируем переменные для подсчёта статистики в оперативной памяти
     point_per_attack = 0
@@ -203,14 +201,15 @@ async def handle_out_of_admin_panel(callback: CallbackQuery, state: FSMContext):
 # Коллбек, который даёт админу выбрать матч
 @router.callback_query(F.data == 'on_statistic_for_match')
 async def hundle_add_player_statistic(callback: CallbackQuery, state: FSMContext):
-    await state.set_state(Admin.in_admin)
+    await state.set_state(Admin.picking_match)
     await callback.answer()
-    await callback.message.edit_text('Выберите подходящий матч.', reply_markup=await kb.matches())
+    buttons = await kb.matches()
+    await callback.message.edit_text('Выберите подходящий матч.', reply_markup=buttons)
 
 # Добавление статистики в конкретный матч
-@router.callback_query(F.data.startswith('match_'), StateFilter(Admin.in_admin))
+@router.callback_query(F.data.startswith('match_'), StateFilter(Admin.picking_match))
 async def handle_add_statis_in_current_match(callback: CallbackQuery, state: FSMContext):
-    await state.set_state(Admin.picking_match)
+    await state.set_state(Admin.picking_club)
     await callback.answer()
 
     # Достает объекты клубов из айди матча
@@ -226,9 +225,10 @@ async def handle_add_statis_in_current_match(callback: CallbackQuery, state: FSM
 
 # Показывает всех игроков в данном клубе
 @router.callback_query(F.data.startswith('club_'), StateFilter(Admin.picking_club)) # Сработает только в состоянии normal
-async def handle_check_current_club(callback: CallbackQuery, state: FSMContext):
+async def handle_select_current_player(callback: CallbackQuery, state: FSMContext):
     await callback.answer()
+    buttons = await kb.players(int(callback.data.split('_')[-1]))
     await callback.message.edit_text(f'Выберите игрока, статистику которого вы хотите добавить / изменить:',
-                                            reply_markup= await kb.players(int(callback.data.split('_')[-1])))
+                                            reply_markup=buttons)
                                             # В функцию передается разделенный коллбек, из которого извлекается айди клуба
-    await state.set_state(Admin.picking_club)
+    await state.set_state(Admin.picking_player)

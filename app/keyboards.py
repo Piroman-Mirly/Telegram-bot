@@ -22,6 +22,10 @@ admin_buttons = InlineKeyboardMarkup(inline_keyboard=[
     [InlineKeyboardButton(text='Выйти из админ-панели',callback_data='return_to_player_state')]
 ])
 
+admin_return_button = InlineKeyboardMarkup(inline_keyboard=[
+    [InlineKeyboardButton(text='Выйти из админ-панели', callback_data='return_to_player_state')]
+])
+
 
 
 
@@ -35,7 +39,7 @@ async def clubs(clubs): # В данном случае билдер создае
         all_clubs_kb.add(InlineKeyboardButton(text=club.name_club, callback_data=f"club_{club.id}"))
     # Если клуба два, то запрос идёт из админки и нужно дать другую кнопку для возврата в меню
     if len(clubs) == 2:
-        all_clubs_kb.add(InlineKeyboardButton(text='К выбору клуба', callback_data='on_statistic_for_match'))
+        all_clubs_kb.add(InlineKeyboardButton(text='Назад', callback_data='on_statistic_for_match'))
     else:
         all_clubs_kb.add(InlineKeyboardButton(text='На главную', callback_data='return_to_player_mm'))
     # Возвращает все клубы в виде кнопок
@@ -54,8 +58,7 @@ async def players(club_id):
 
     for player in all_players:
         all_players_kb.add(InlineKeyboardButton(text=player.nickname_player, callback_data=f"player_{player.id}"))
-    all_players_kb.add(InlineKeyboardButton(text='В меню выбора клубов', callback_data='check_all_club'))
-    all_players_kb.add(InlineKeyboardButton(text='На главную', callback_data='return_to_player_mm'))
+    all_players_kb.add(InlineKeyboardButton(text='На главную', callback_data='on_statistic_for_match'))
     # Возвращает всех игроков в клубе в виде кнопок
     return all_players_kb.adjust(1).as_markup()
 
