@@ -3,7 +3,6 @@ import logging
 from aiogram import F, Router
 from aiogram.filters import CommandStart, Command, StateFilter
 from aiogram.types import Message, CallbackQuery
-from aiogram.fsm.state import StatesGroup, State
 from aiogram.fsm.context import FSMContext
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
@@ -11,39 +10,11 @@ from app.middlewares import TestMiddleware
 import app.database.requests as request
 
 import app.keyboards as kb
-
-from config import ADMIN
-
+from app.states import Admin
 
 router = Router()
 
 router.message.middleware(TestMiddleware())
-
-# FSM состояния админ-панели
-class Admin(StatesGroup):
-    # Статус, чтобы удалять весь мусор в сообщениях
-    normal = State()
-    # Общие статусы
-    make_choice = State() # Делает выбор команды перед заходом в админку
-
-    # Статусы для главного админа, доступ к которым даётся конкретному тг-айди
-    add_left_club = State() # Добавил первый клуб в матче
-    add_right_club = State() # Добавил второй клуб в матче
-    add_date = State() # Добавил дату матча
-
-    # Статусы для обычного судьи
-    picking_match = State() # Судья выбрал матч
-    picking_club = State() # Судья выбрал клуб
-    picking_player = State() # Судья выбрал конкретного игрока
-    entering_stats = State() # Судья ввёл значения статистики конкретному игроку
-    confirming_match = State() # Судья подтвердил значения 
-
-    
-    
-    
-    
-    
-    
     
 
 
@@ -57,13 +28,6 @@ async def cmd_start(message: Message, state: FSMContext):
     # await message.answer('Добро пожаловать, новичок. \nОбновите бота, чтобы использовать весь его функционал')
 
     await state.set_state(Admin.normal)
-
-# Админ-панель
-@router.message(F.text == ADMIN)
-async def admin_panel(message: Message, state: FSMContext):
-    await message.delete()
-    await message.answer('Вы в админ-панеле, выберите действие.', reply_markup=kb.admin_buttons)
-    await state.set_state(Admin.make_choice)   
 
 # Удаляет все сообщения, написанные в боте
 @router.message(Admin.normal)
@@ -188,47 +152,3 @@ async def hundle_check_statistic_current_player(callback: CallbackQuery):
                                         f'\nБлок: {all_stat_matches[1]}'
                                         f'\nПодача: {all_stat_matches[2]}', reply_markup=kb.return_to_mm)
 
-
-# Админка
-
-# Коллбек, который выводит пользователя из состояния админа
-@router.callback_query(F.data == 'return_to_player_state')
-async def handle_out_of_admin_panel(callback: CallbackQuery, state: FSMContext):
-    await state.set_state(Admin.normal)
-    await callback.answer()
-    await callback.message.edit_text('Вы вышли из админ-панели', reply_markup=kb.return_to_mm)
-
-# Коллбек, который даёт админу выбрать матч
-@router.callback_query(F.data == 'on_statistic_for_match')
-async def hundle_add_player_statistic(callback: CallbackQuery, state: FSMContext):
-    await state.set_state(Admin.picking_match)
-    await callback.answer()
-    buttons = await kb.matches()
-    await callback.message.edit_text('Выберите подходящий матч.', reply_markup=buttons)
-
-# Добавление статистики в конкретный матч
-@router.callback_query(F.data.startswith('match_'), StateFilter(Admin.picking_match))
-async def handle_add_statis_in_current_match(callback: CallbackQuery, state: FSMContext):
-    await state.set_state(Admin.picking_club)
-    await callback.answer()
-
-    # Достает объекты клубов из айди матча
-    clubs = await request.get_two_club_id_in_match(int(callback.data.split('_')[-1]))
-
-    # Кнопки клубов
-    buttons = await kb.clubs(clubs) # Клубы передаются в билдер кнопок
-
-
-    await callback.message.edit_text('Выберите клуб, статистику игроков которых вы желаете внести:', reply_markup=buttons)
-
-
-
-# Показывает всех игроков в данном клубе
-@router.callback_query(F.data.startswith('club_'), StateFilter(Admin.picking_club)) # Сработает только в состоянии normal
-async def handle_select_current_player(callback: CallbackQuery, state: FSMContext):
-    await callback.answer()
-    buttons = await kb.players(int(callback.data.split('_')[-1]))
-    await callback.message.edit_text(f'Выберите игрока, статистику которого вы хотите добавить / изменить:',
-                                            reply_markup=buttons)
-                                            # В функцию передается разделенный коллбек, из которого извлекается айди клуба
-    await state.set_state(Admin.picking_player)
