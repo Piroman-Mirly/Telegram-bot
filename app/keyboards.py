@@ -10,9 +10,16 @@ player_kb = InlineKeyboardMarkup(inline_keyboard=[
     [InlineKeyboardButton(text='Статистика', callback_data='statistic_main_player')], [InlineKeyboardButton(text='Статистика всех игроков', callback_data='statistics_all_players')], [InlineKeyboardButton(text='Таблица', callback_data='league_table')]
 ])
 
-# Кнопка возвращает в главный экран игрока
+# Возврат в меню игрока
 return_to_mm = InlineKeyboardMarkup(inline_keyboard=[
-    [InlineKeyboardButton(text='На главную', callback_data='return_to_player_mm')]
+    [InlineKeyboardButton(text='Вернуться в профиль', callback_data='return_to_player_mm')]
+])
+
+# Кнопки для отображения топ-10 игроков
+filter_category = InlineKeyboardMarkup(inline_keyboard=[
+    [InlineKeyboardButton(text='Топ-10 по атакам', callback_data='top_attack')], [InlineKeyboardButton(text='Топ-10 по блокам', callback_data='top_block')], [InlineKeyboardButton(text='Топ-10 по подачам', callback_data='top_serve')],
+    [InlineKeyboardButton(text='Топ-10 по общему количеству очков', callback_data='top_total')],
+    [InlineKeyboardButton(text='Вернуться в профиль', callback_data='return_to_player_mm')]
 ])
 
 # Кнопки для админ-панели

@@ -100,3 +100,28 @@ async def get_two_club_id_in_match(match_id):
 
         pair = (left_club, right_club)
         return pair
+
+async def get_all_players_statistic():
+    async with async_session() as session:
+        total_points = (
+            func.coalesce(func.sum(Statistic_per_match.attack_per_match), 0) +
+            func.coalesce(func.sum(Statistic_per_match.block_per_match), 0) +
+            func.coalesce(func.sum(Statistic_per_match.serve_per_match), 0)
+        )
+
+        query = (
+            select(Player.nickname_player, Club.name_club,
+                   func.coalesce(func.sum(Statistic_per_match.attack_per_match), 0).label("attack"),
+                   func.coalesce(func.sum(Statistic_per_match.block_per_match), 0).label("block"),
+                   func.coalesce(func.sum(Statistic_per_match.serve_per_match), 0).label("serve"),
+                   total_points.label("total_points")
+                   )
+                    # Соединяем таблицу клубов (Player.club_id == Club.id)
+                    .join(Club, Player.club_id == Club.id)
+                    .outerjoin(Statistic_per_match, Player.id == Statistic_per_match.player_id)
+                    .group_by(Player.id, Player.nickname_player, Club.name_club)
+                    .order_by(desc("total_points"))
+        )
+
+        result = await session.execute(query)
+        return result.all() # Список кортежей в формате: [(ник, клуб, атака, блок, подача, всего очков)]

@@ -22,8 +22,13 @@ router.message.middleware(TestMiddleware())
 # Комманда старт
 @router.message(CommandStart())
 async def cmd_start(message: Message, state: FSMContext):
-    # to_enter = await request.set_user(message.from_user.id, message.from_user.first_name)
-    await message.answer(f'Привет! Твой ID: {message.from_user.id}\nИмя: {message.from_user.first_name}', reply_markup=kb.return_to_mm)
+    data_player = await request.get_statistic_current_player(message.from_user.id)
+    await message.answer(f'———Главный экран———'
+                                     f'\nВаш игровой ник: {data_player.nickname_player}'
+                                     f'\nАйди клуба: {data_player.club_id}' # Поменять на название
+                                     f'\nВаша позиция: {data_player.role}'
+                                     f'\nВаш трансферный статус: {data_player.transfer_status}',
+                                     reply_markup=kb.player_kb)
     # Реализовать одобрение входа / функцию входа, чтобы статистику могли видеть только зарегестрированные пользователи
     # await message.answer('Добро пожаловать, новичок. \nОбновите бота, чтобы использовать весь его функционал')
 
@@ -33,22 +38,9 @@ async def cmd_start(message: Message, state: FSMContext):
 @router.message(Admin.normal)
 async def delete_all_message(message: Message, state: FSMContext):
     await message.delete()
-    
-
-
-
-
-
-
-# Player statistic callback
-
-
-
 
 
 # Callbacks
-
-
 
 # Коллбек, который отображает главное меню игрока / его профиль
 @router.callback_query(F.data == "return_to_player_mm", StateFilter(Admin.normal))
@@ -134,7 +126,7 @@ async def handle_statistic_main_player(callback: CallbackQuery):
 
 # Колбек отвечает за вывод статистики выбранного пользователем игрока
 @router.callback_query(F.data.startswith('player_'), StateFilter(Admin.normal))
-async def hundle_check_statistic_current_player(callback: CallbackQuery):
+async def handle_check_statistic_current_player(callback: CallbackQuery):
     # Инициализируем переменные для подсчёта статистики в оперативной памяти
     point_per_attack = 0
     point_per_block = 0
@@ -152,3 +144,32 @@ async def hundle_check_statistic_current_player(callback: CallbackQuery):
                                         f'\nБлок: {all_stat_matches[1]}'
                                         f'\nПодача: {all_stat_matches[2]}', reply_markup=kb.return_to_mm)
 
+
+# Колбек отвечает за вывод статистики всех игроков
+@router.callback_query(F.data == 'statistics_all_players', StateFilter(Admin.normal))
+async def handle_all_players_statistic(callback: CallbackQuery):
+    await callback.answer()
+
+    # Список кортежей в формате: [(ник, клуб, атака, блок, подача, всего очков)]
+    all_stats = await request.get_all_players_statistic() 
+
+    # Если список пуст и статистики нет
+    if not all_stats:
+        await callback.message.edit_text('Статистики пока нет', reply_markup=kb.return_to_mm)
+        return
+    
+    lines = ["🏐 <b>Общая статистика игроков:</b>\n"]
+
+    # Проходимся по каждой строчке в бд
+    for place, row in enumerate(all_stats, start=1):
+        # row - кортеж, который нужно распаковать
+        nickname, club_name, attack, block, serve, total_points = row
+
+        # Добавляем игрока в качестве строчки
+        lines.append(f"{place}. <b>{nickname}</b> ({club_name}) — <b>{total_points} очк.</b>")
+
+        # Детальная статистика мелким шрифтом
+        lines.append(f"   ⚔️ Атака: {attack} | 🧱 Блок: {block} | 🎾 Подача: {serve}\n")
+
+    message = "\n".join(lines)
+    await callback.message.edit_text(message, reply_markup=kb.filter_category, parse_mode="HTML")
