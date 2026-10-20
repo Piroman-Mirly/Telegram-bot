@@ -144,32 +144,56 @@ async def handle_check_statistic_current_player(callback: CallbackQuery):
                                         f'\nБлок: {all_stat_matches[1]}'
                                         f'\nПодача: {all_stat_matches[2]}', reply_markup=kb.return_to_mm)
 
+# Колбек, который переносит пользователя в окно выбора категории для показа статистики топ-10
+@router.callback_query(F.data == 'choice_category_statistic', StateFilter(Admin.normal))
+async def handle_make_choice_category_statistic_top_10_players(callback: CallbackQuery):
+    await callback.answer()
+    await callback.message.edit_text('Выберите категорию статистики', reply_markup=kb.filter_category)
+
+
 
 # Колбек отвечает за вывод статистики всех игроков
-@router.callback_query(F.data == 'statistics_all_players', StateFilter(Admin.normal))
-async def handle_all_players_statistic(callback: CallbackQuery):
+@router.callback_query(F.data.startswith("top_"), StateFilter(Admin.normal))
+async def handle_top_players_statistic(callback: CallbackQuery):
     await callback.answer()
 
-    # Список кортежей в формате: [(ник, клуб, атака, блок, подача, всего очков)]
-    all_stats = await request.get_all_players_statistic() 
+    # Из callback'а достаём категорию: "top_attack" → "attack"
+    category = callback.data.split("_")[1]
 
-    # Если список пуст и статистики нет
-    if not all_stats:
-        await callback.message.edit_text('Статистики пока нет', reply_markup=kb.return_to_mm)
+    # Список кортежей в формате: [(ник, клуб, атака, блок, подача, всего очков)] с лимитом в 10 игроков
+    top = await request.get_top_players(category=category, limit=10)
+
+    # Переводим в человекочитаемый заголовок
+    titles = {
+        "attack": "⚔️ Топ-10 по атаке",
+        "block":  "🧱 Топ-10 по блоку",
+        "serve":  "🎾 Топ-10 по подаче",
+        "total":  "🏆 Топ-10 по общим очкам",
+    }
+    # Если нет статистики, то бот предупредит
+    if not top:
+        await callback.message.edit_text("Статистики пока нет.", reply_markup=kb.return_to_mm)
         return
-    
-    lines = ["🏐 <b>Общая статистика игроков:</b>\n"]
 
-    # Проходимся по каждой строчке в бд
-    for place, row in enumerate(all_stats, start=1):
-        # row - кортеж, который нужно распаковать
-        nickname, club_name, attack, block, serve, total_points = row
+    # Создается текст для вывода топ-10
+    lines = [f"<b>{titles.get(category, 'Топ-10')}</b>\n"]
 
-        # Добавляем игрока в качестве строчки
-        lines.append(f"{place}. <b>{nickname}</b> ({club_name}) — <b>{total_points} очк.</b>")
 
-        # Детальная статистика мелким шрифтом
-        lines.append(f"   ⚔️ Атака: {attack} | 🧱 Блок: {block} | 🎾 Подача: {serve}\n")
+    # Цикл, который создает топ-10 игроков по ка тегории
+    for place, row in enumerate(top, start=1):
+        nickname, club_name, attack, block, serve, total = row
 
-    message = "\n".join(lines)
-    await callback.message.edit_text(message, reply_markup=kb.filter_category, parse_mode="HTML")
+        # Значение, по которому сортируем, — подсветим жирным
+        values = {"attack": attack, "block": block, "serve": serve, "total": total}
+        highlight = values.get(category, total)
+
+        lines.append(
+            f"{place}. <b>{nickname}</b> ({club_name}) — <b>{highlight}</b>\n"
+            f"   ⚔️ {attack} | 🧱 {block} | 🎾 {serve} | 🏆 {total}"
+        )
+
+    await callback.message.edit_text(
+        "\n".join(lines),
+        reply_markup=kb.return_to_category_statisitc,
+        parse_mode="HTML",
+    )

@@ -101,7 +101,9 @@ async def get_two_club_id_in_match(match_id):
         pair = (left_club, right_club)
         return pair
 
-async def get_all_players_statistic():
+# Функция возвращает топ-10 по указанным категориям
+# Всего категорий может быть 4: атака, блок, подача и всего очков
+async def get_top_players(category: str = 'total', limit: int = 10):
     async with async_session() as session:
         total_points = (
             func.coalesce(func.sum(Statistic_per_match.attack_per_match), 0) +
@@ -122,6 +124,18 @@ async def get_all_players_statistic():
                     .group_by(Player.id, Player.nickname_player, Club.name_club)
                     .order_by(desc("total_points"))
         )
+
+        # Выбор, по какой колонке сортировать
+        order_map = {
+            "attack": desc("attack"),
+            "block": desc("block"),
+            "serve": desc("serve"),
+            "total": desc("total_points")
+        }
+
+        # order_map.get(category, desc("total_points")) защищает от опечаток
+        # если передашь неизвестную категорию, сортировка будет по общим очкам.
+        query = query.order_by(order_map.get(category, desc("total_points")))
 
         result = await session.execute(query)
         return result.all() # Список кортежей в формате: [(ник, клуб, атака, блок, подача, всего очков)]
