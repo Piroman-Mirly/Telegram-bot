@@ -22,7 +22,15 @@ router.message.middleware(TestMiddleware())
 # Комманда старт
 @router.message(CommandStart())
 async def cmd_start(message: Message, state: FSMContext):
+    await state.set_state(Admin.normal)
+
     data_player = await request.get_statistic_current_player(message.from_user.id)
+
+    # Реализовать возможность регистрации
+    if message.from_user.id != data_player.telegram_id:
+        return
+
+
     # В будущем переделать на один запрос с JOIN
     club_name = await request.get_club_name(data_player.club_id)
     await message.answer(f'———Главный экран———'
@@ -31,9 +39,7 @@ async def cmd_start(message: Message, state: FSMContext):
                                      f'\nВаша позиция: {data_player.role}'
                                      f'\nВаш трансферный статус: {data_player.transfer_status}',
                                      reply_markup=kb.player_kb)
-    # Реализовать одобрение входа / функцию входа, чтобы статистику могли видеть только зарегестрированные пользователи
-
-    await state.set_state(Admin.normal)
+    
 
 # Удаляет все сообщения, написанные в боте
 @router.message(Admin.normal)
