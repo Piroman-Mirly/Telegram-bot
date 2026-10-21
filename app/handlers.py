@@ -10,7 +10,7 @@ from app.middlewares import TestMiddleware
 import app.database.requests as request
 
 import app.keyboards as kb
-from app.states import Admin
+from app.states import Admin, Registration
 
 router = Router()
 
@@ -26,8 +26,10 @@ async def cmd_start(message: Message, state: FSMContext):
 
     data_player = await request.get_statistic_current_player(message.from_user.id)
 
-    # Реализовать возможность регистрации
-    if message.from_user.id != data_player.telegram_id:
+    # Если вернули None, то значит такого пользователя нет и начинается регистрация
+    if not data_player:
+        await message.answer('Новый пользователь! Давайте зарегестрируемся.\nВведите ваш игровой ник')
+        await state.set_state(Registration.nickname)
         return
 
 
@@ -54,10 +56,12 @@ async def delete_all_message(message: Message, state: FSMContext):
 async def handle_return_to_player_mm(callback : CallbackQuery):
     await callback.answer()
     data_player = await request.get_statistic_current_player(callback.from_user.id)
+    # В будущем переделать на один запрос с JOIN
+    club_name = await request.get_club_name(data_player.club_id)
     # Меняет последний текст бота на статистику игрока.
     await callback.message.edit_text(f'———Главный экран———'
                                      f'\nВаш игровой ник: {data_player.nickname_player}'
-                                     f'\nАйди клуба: {data_player.club_id}' # Поменять на название
+                                     f'\nНазвание клуба: {club_name}'
                                      f'\nВаша позиция: {data_player.role}'
                                      f'\nВаш трансферный статус: {data_player.transfer_status}',
                                      reply_markup=kb.player_kb)

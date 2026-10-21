@@ -2,7 +2,10 @@ from aiogram.fsm.state import StatesGroup, State
 
 
 # FSM состояния админ-панели
-class Admin(StatesGroup):
+class Admin(StatesGroup): 
+
+
+
     # Статус, чтобы удалять весь мусор в сообщениях
     normal = State()
     # Общие статусы
@@ -18,4 +21,15 @@ class Admin(StatesGroup):
     picking_club = State() # Судья выбрал клуб
     picking_player = State() # Судья выбрал конкретного игрока
     entering_stats = State() # Судья ввёл значения статистики конкретному игроку
-    confirming_match = State() # Судья подтвердил значения 
+    confirming_match = State() # Судья подтвердил значения
+
+ # Состояния для регистрации
+class Registration(StatesGroup):
+    # Бот ждёт имя
+    nickname = State()
+    
+    # Бот ждёт позицию
+    await_role = State()
+
+    # Подвтерждение регистрации
+    confirm_reg = State()

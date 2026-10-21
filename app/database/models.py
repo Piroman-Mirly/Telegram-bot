@@ -17,11 +17,11 @@ class Player(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True) # Персональный айди всех игроков
 
-    telegram_id: Mapped[int] = mapped_column(BigInteger) # Телеграм айди игрока
+    telegram_id: Mapped[int] = mapped_column(BigInteger, nullable=False) # Телеграм айди игрока
     nickname_player: Mapped[str] = mapped_column(String(50), unique=True, nullable=False) # Игровой ник
     role: Mapped[str] = mapped_column(String(25), nullable=False) # Позиция на поле
-    transfer_status: Mapped[str] = mapped_column(String(32), nullable=False) # Трансферный статус
-    club_id: Mapped[int] = mapped_column(ForeignKey('clubs.id')) # Внешний ключ от клуба
+    transfer_status: Mapped[str] = mapped_column(String(32), default="Свободный агент", nullable=True) # Трансферный статус
+    club_id: Mapped[int | None] = mapped_column(ForeignKey('clubs.id'), nullable=True) # Внешний ключ от клуба
 
     club: Mapped["Club"] = relationship( back_populates='players', lazy='selectin') # Связь игрока с клубом
 

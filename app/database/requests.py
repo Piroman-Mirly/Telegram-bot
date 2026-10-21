@@ -1,17 +1,18 @@
 from app.database.models import async_session
 from app.database.models import Player, Club, Coach, Statistic_per_match, Match, User
+from sqlalchemy.exc import IntegrityError
 
 from sqlalchemy import select, update, delete, func, desc
 
-async def set_user(tg_id: int, username_db: str): # Функция отвечает за добавление нового пользователя
+async def create_player(tg_id: int, nickname: str, role: str): # Функция отвечает за добавление нового игрока
     async with async_session() as session:
-        # В переменную user передается объект пользователя из БД с подходящим именем и тг айди
-        user = await session.scalar(select(User).where(User.telegram_id == tg_id))
-
-        # Если такого пользователя нет, то он создается
-        if not user:
-            session.add(User(telegram_id = tg_id, username = username_db))
+        player = Player(telegram_id=tg_id, nickname_player=nickname, role=role)
+        session.add(player)
+        # Попытка записать. Если ошибка, то гг :(
+        try:
             await session.commit()
+        except IntegrityError:
+            await session.rollback()
 
 
 async def get_all_clubs(): # Функция передает данные всех клубов

@@ -5,6 +5,7 @@ from aiogram import Bot, Dispatcher
 from config import TOKEN
 from app.handlers import router as main_router
 from app.admin_handler import admin_router
+from app.regist_handler import regist_router
 
 from app.database.models import async_main
 
@@ -16,6 +17,7 @@ dp = Dispatcher()
 async def main():
     await async_main()
     dp.include_router(admin_router)
+    dp.include_router(regist_router)
     dp.include_router(main_router)
     await dp.start_polling(bot)
 
