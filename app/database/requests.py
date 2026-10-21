@@ -42,6 +42,12 @@ async def get_statistic_current_player(tg_id):
 
         return all_data_current_player
 
+# Функция возвращает название клуба
+async def get_club_name(club_id):
+    async with async_session() as session:
+        club_name = await session.scalar(select(Club.name_club).where(Club.id == club_id))
+        return club_name
+
 # Функция возвращает отсортированную по очкам таблицу с клубами
 async def get_data_for_table_clubs():
     async with async_session() as session:

@@ -23,14 +23,15 @@ router.message.middleware(TestMiddleware())
 @router.message(CommandStart())
 async def cmd_start(message: Message, state: FSMContext):
     data_player = await request.get_statistic_current_player(message.from_user.id)
+    # В будущем переделать на один запрос с JOIN
+    club_name = await request.get_club_name(data_player.club_id)
     await message.answer(f'———Главный экран———'
                                      f'\nВаш игровой ник: {data_player.nickname_player}'
-                                     f'\nАйди клуба: {data_player.club_id}' # Поменять на название
+                                     f'\nНазвание клуба: {club_name}'
                                      f'\nВаша позиция: {data_player.role}'
                                      f'\nВаш трансферный статус: {data_player.transfer_status}',
                                      reply_markup=kb.player_kb)
     # Реализовать одобрение входа / функцию входа, чтобы статистику могли видеть только зарегестрированные пользователи
-    # await message.answer('Добро пожаловать, новичок. \nОбновите бота, чтобы использовать весь его функционал')
 
     await state.set_state(Admin.normal)
 
