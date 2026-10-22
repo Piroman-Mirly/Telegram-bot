@@ -1,10 +1,13 @@
 from app.database.models import async_session
 from app.database.models import Player, Club, Coach, Statistic_per_match, Match, User
 from sqlalchemy.exc import IntegrityError
+from datetime import datetime
 
 from sqlalchemy import select, update, delete, func, desc
 
-async def create_player(tg_id: int, nickname: str, role: str): # Функция отвечает за добавление нового игрока
+
+# Функция отвечает за добавление нового игрока
+async def create_player(tg_id: int, nickname: str, role: str): 
     async with async_session() as session:
         player = Player(telegram_id=tg_id, nickname_player=nickname, role=role)
         session.add(player)
@@ -15,9 +18,18 @@ async def create_player(tg_id: int, nickname: str, role: str): # Функция 
             await session.rollback()
 
 
+async def create_new_match(date: datetime, left_id: int, right_id: int):
+    async with async_session() as session:
+        match = Match(date_match=date, left_club_id=left_id, right_club_id=right_id)
+        session.add(match)
+        try:
+            await session.commit()
+        except IntegrityError:
+            await session.rollback()
+
 async def get_all_clubs(): # Функция передает данные всех клубов
     async with async_session() as session:
-        return await session.scalars(select(Club))
+        return (await session.scalars(select(Club))).all()
 
 async def get_name_club(club_id): # Функция возвращает название конкретного клуба
     async with async_session() as session:
@@ -95,7 +107,7 @@ async def get_all_matches():
         result = await session.scalars(select(Match))
         return result.all()
 
-# Функция возвращает айди двух клубов
+# Функция возвращает кортеж из двух клубов
 async def get_two_club_id_in_match(match_id):
     async with async_session() as session:
         # Айди извлекаются напрямую из нужного матча

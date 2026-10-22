@@ -27,13 +27,26 @@ filter_category = InlineKeyboardMarkup(inline_keyboard=[
 # Кнопки для админ-панели
 # Для главного экрана
 admin_buttons = InlineKeyboardMarkup(inline_keyboard=[
-    [InlineKeyboardButton(text='Добавить статистику матча', callback_data='on_statistic_for_match')],
+    [InlineKeyboardButton(text='Добавить статистику матча', callback_data='on_statistic_for_match'), InlineKeyboardButton(text='Добавить матч', callback_data='add_new_match')],
     [InlineKeyboardButton(text='Выйти из админ-панели',callback_data='return_to_player_state')]
 ])
 
+# Кнопка для выхода из админ панели
 admin_return_button = InlineKeyboardMarkup(inline_keyboard=[
     [InlineKeyboardButton(text='Выйти из админ-панели', callback_data='return_to_player_state')]
 ])
+
+# Кнопка для возвращения в главный экран админ-панели
+to_mm_admin_panel = InlineKeyboardMarkup(inline_keyboard=[
+    [InlineKeyboardButton(text='Вернуться в главное меню админ-панели', callback_data='to_mm_admin_panel')]
+])
+
+# Кнопки для подтверждения создания матча
+confirm_create_match_btn = InlineKeyboardMarkup(inline_keyboard=[
+    [InlineKeyboardButton(text='Подтвердить', callback_data='confirm_data_match')],
+    [InlineKeyboardButton(text='Начать сначала', callback_data='add_new_match')]                                                                                         
+])
+
 
 # Кнопки для выбора позиции в регистрации
 reg_role_buttons = ReplyKeyboardMarkup(keyboard=[
@@ -49,7 +62,6 @@ confirm_reg_kb = ReplyKeyboardMarkup(keyboard=[
 ])
 
 
-
 # Билдер, создающий кнопки из N количества данных
 async def clubs(clubs): # В данном случае билдер создает кнопки клубов
     all_clubs = clubs # На вход подаются строки клуба
@@ -61,7 +73,8 @@ async def clubs(clubs): # В данном случае билдер создае
     if len(clubs) == 2:
         all_clubs_kb.add(InlineKeyboardButton(text='Назад', callback_data='on_statistic_for_match'))
     else:
-        all_clubs_kb.add(InlineKeyboardButton(text='На главную', callback_data='return_to_player_mm'))
+        # Пока что эта функция используется только в админке, поэтому кнопка "на главную" будет возвращать в меню админки
+        all_clubs_kb.add(InlineKeyboardButton(text='На главную', callback_data='to_mm_admin_panel'))
     # Возвращает все клубы в виде кнопок
     return all_clubs_kb.adjust(2).as_markup() # adjust отвечает за то, сколько кнопок будет в одном ряду
 
