@@ -106,6 +106,5 @@ async def matches():
         all_matches_kb.add(InlineKeyboardButton(text=f'{match.id}.'
                                                 f'{left_name_club} {match.score_left} - {match.score_right} {right_name_club}',
                                                 callback_data=f'match_{match.id}'))
-    # Для возможности вернуться в окно выбора матча
-    #all_matches_kb.add(InlineKeyboardButton(text='Вернуться к выбору матча', callback_data='on_statistic_for_match'))
+    all_matches_kb.add(InlineKeyboardButton(text='Вернуться в главное меню админ-панели', callback_data='to_mm_admin_panel'))
     return all_matches_kb.adjust(1).as_markup()

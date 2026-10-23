@@ -128,7 +128,7 @@ async def hundle_add_player_statistic(callback: CallbackQuery, state: FSMContext
     await state.set_state(Admin.picking_match)
     await callback.answer()
     buttons = await kb.matches()
-    await callback.message.edit_text('Выберите подходящий матч.', reply_markup=buttons)
+    await callback.message.edit_text('Выберите подходящий матч', reply_markup=buttons)
 
 
 # Добавление статистики в конкретный матч
