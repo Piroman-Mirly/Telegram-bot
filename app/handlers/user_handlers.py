@@ -9,7 +9,7 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from app.middlewares import TestMiddleware
 import app.database.requests as request
 
-import app.keyboards as kb
+import app.keyboards.keyboards as user_kb
 from app.states import Admin, Registration
 
 router = Router()
@@ -40,7 +40,7 @@ async def cmd_start(message: Message, state: FSMContext):
                                      f'\nНазвание клуба: {club_name}'
                                      f'\nВаша позиция: {data_player.role}'
                                      f'\nВаш трансферный статус: {data_player.transfer_status}',
-                                     reply_markup=kb.player_kb)
+                                     reply_markup=user_kb.player_kb)
     
 
 # Удаляет все сообщения, написанные в боте
@@ -64,14 +64,14 @@ async def handle_return_to_player_mm(callback : CallbackQuery):
                                      f'\nНазвание клуба: {club_name}'
                                      f'\nВаша позиция: {data_player.role}'
                                      f'\nВаш трансферный статус: {data_player.transfer_status}',
-                                     reply_markup=kb.player_kb)
+                                     reply_markup=user_kb.player_kb)
 
 # Отображает все клубы в виде Inline кнопок
 @router.callback_query(F.data == "check_all_club", StateFilter(Admin.normal))
 async def handle_check_all_club(callback: CallbackQuery):
     await callback.answer()
     # Присваиваем кнопки клубов
-    buttons = await kb.clubs(await request.get_all_clubs()) # Взято из request, передает все клубы прямиком из БД
+    buttons = await user_kb.clubs(await request.get_all_clubs()) # Взято из request, передает все клубы прямиком из БД
     await callback.message.edit_text(f'Выберите необходимый клуб',
                                         reply_markup=buttons)
 
@@ -112,7 +112,7 @@ async def handle_table_league(callback: CallbackQuery):
     # Разделяем итоговый массив "переходом на новую строку" (\n)
     message = "<pre>" + "\n".join(all_lines) + "</pre>"
 
-    await callback.message.edit_text(message, reply_markup=kb.return_to_mm, parse_mode="HTML")
+    await callback.message.edit_text(message, reply_markup=user_kb.return_to_mm, parse_mode="HTML")
 
 # Коллбек отвечает за вывод статистики пользователя как игрока
 @router.callback_query(F.data == 'statistic_main_player', StateFilter(Admin.normal))
@@ -133,7 +133,7 @@ async def handle_statistic_main_player(callback: CallbackQuery):
     await callback.message.edit_text(f'Ваша статистика:'
                                      f'\nАтака: {all_stat_matches[0]}'
                                      f'\nБлок: {all_stat_matches[1]}'
-                                     f'\nПодача: {all_stat_matches[2]}', reply_markup=kb.return_to_mm)
+                                     f'\nПодача: {all_stat_matches[2]}', reply_markup=user_kb.return_to_mm)
 
 # Колбек отвечает за вывод статистики выбранного пользователем игрока
 @router.callback_query(F.data.startswith('player_'), StateFilter(Admin.normal))
@@ -153,13 +153,13 @@ async def handle_check_statistic_current_player(callback: CallbackQuery):
     await callback.message.edit_text(f'Статистика этого игрока:'
                                         f'\nАтака: {all_stat_matches[0]}'
                                         f'\nБлок: {all_stat_matches[1]}'
-                                        f'\nПодача: {all_stat_matches[2]}', reply_markup=kb.return_to_mm)
+                                        f'\nПодача: {all_stat_matches[2]}', reply_markup=user_kb.return_to_mm)
 
 # Колбек, который переносит пользователя в окно выбора категории для показа статистики топ-10
 @router.callback_query(F.data == 'choice_category_statistic', StateFilter(Admin.normal))
 async def handle_make_choice_category_statistic_top_10_players(callback: CallbackQuery):
     await callback.answer()
-    await callback.message.edit_text('Выберите категорию статистики', reply_markup=kb.filter_category)
+    await callback.message.edit_text('Выберите категорию статистики', reply_markup=user_kb.filter_category)
 
 
 
@@ -183,7 +183,7 @@ async def handle_top_players_statistic(callback: CallbackQuery):
     }
     # Если нет статистики, то бот предупредит
     if not top:
-        await callback.message.edit_text("Статистики пока нет.", reply_markup=kb.return_to_mm)
+        await callback.message.edit_text("Статистики пока нет.", reply_markup=user_kb.return_to_mm)
         return
 
     # Создается текст для вывода топ-10
@@ -205,6 +205,6 @@ async def handle_top_players_statistic(callback: CallbackQuery):
 
     await callback.message.edit_text(
         "\n".join(lines),
-        reply_markup=kb.return_to_category_statisitc,
+        reply_markup=user_kb.return_to_category_statisitc,
         parse_mode="HTML",
     )
