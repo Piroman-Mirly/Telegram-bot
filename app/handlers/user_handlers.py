@@ -112,7 +112,7 @@ async def handle_table_league(callback: CallbackQuery):
     # Разделяем итоговый массив "переходом на новую строку" (\n)
     message = "<pre>" + "\n".join(all_lines) + "</pre>"
 
-    await callback.message.edit_text(message, reply_markup=user_kb.return_to_mm, parse_mode="HTML")
+    await callback.message.edit_text(message, reply_markup=user_kb.table_button, parse_mode="HTML")
 
 # Коллбек отвечает за вывод статистики пользователя как игрока
 @router.callback_query(F.data == 'statistic_main_player', StateFilter(Admin.normal))
@@ -208,3 +208,12 @@ async def handle_top_players_statistic(callback: CallbackQuery):
         reply_markup=user_kb.return_to_category_statisitc,
         parse_mode="HTML",
     )
+
+
+# Колбек отвечает за показ расписания на сегодня
+# Сделать возможность смотреть расписания на несколько дней вперёд
+@router.callback_query(F.data == "match_schedue", StateFilter(Admin.normal))
+async def get_match_schedule(callback: CallbackQuery, state: FSMContext):
+    await callback.answer()
+    all_matches = await user_kb.match_schedule()
+    await callback.message.edit_text('Выберите подходящий матч', reply_markup=all_matches)
