@@ -31,7 +31,7 @@ async def handle_out_of_admin_panel(callback: CallbackQuery, state: FSMContext):
     await state.set_state(Admin.normal)
     await callback.answer()
     await callback.message.edit_text('Вы вышли из админ-панели\n'
-    'Перезапустите бота, чтобы использовать его как обычный пользователь', reply_markup=kb.return_to_mm)
+    'Нажмите кнопку, чтобы использовать его как обычный пользователь', reply_markup=kb.return_to_mm)
 
 # Создание матча
 # Коллбек, который позволяет админу начать создавать матч
@@ -40,7 +40,7 @@ async def handle_add_match_to_admin_panel(callback: CallbackQuery, state: FSMCon
     await callback.answer()
     await state.set_state(Admin.set_date)
     await callback.message.edit_text('Давайте создадим матч!\n'
-    'Введите дату матча в формате ДД.ММ.ГГГГ, например: 01.01.2025')
+    'Введите дату матча в формате ДД.ММ.ГГГГ, например: 01.01.2025', reply_markup=kb.to_mm_admin_panel)
 
 # Бот ожидает дату
 @admin_router.message(Admin.set_date)
@@ -51,18 +51,20 @@ async def handle_get_date_match(message: Message, state: FSMContext):
         match_date = datetime.strptime(text, "%d.%m.%Y").date()
     except ValueError:
         await message.answer('Неверный формат! Пожалуйста, введите дату в формате ДД.ММ.ГГГГ\n'
-        'Пример: 01.01.2025')
+        'Пример: 01.01.2025', reply_markup=kb.to_mm_admin_panel)
         return
     # Сохранение данных в оперативную память FSM состояний
     await state.update_data(date = match_date)
     await state.set_state(Admin.choice_left_club)
-    
-
-# Бот предлагает выбрать первый клуб
-@admin_router.message(Admin.choice_left_club)
-async def pick_left_club(message: Message, state: FSMContext):
     buttons_clubs = await kb.clubs(await request.get_all_clubs())
     await message.answer('Выберите клуб, который играл на домашнем поле', reply_markup=buttons_clubs)
+    
+
+# Ловушка, если пользователь пишет текст вместо нажатия на инлайн-кнопку
+@admin_router.message(Admin.choice_left_club)
+async def trap_left_club(message: Message, state: FSMContext):
+    await message.answer('Пожалуйста, выберите клуб, нажав на одну из кнопок выше. 👆')
+    
 
 # Айди первого клуба заносится в оперативную память, вбот предлагает выбрать второй клуб
 @admin_router.callback_query(F.data.startswith('club_'), StateFilter(Admin.choice_left_club))
@@ -86,7 +88,9 @@ async def claim_right_club(callback: CallbackQuery, state: FSMContext):
 
     # Если первый и второй клуб похожи, то будет выведена ошибка
     if data.get('left_club') == club_id:
-        await callback.message.edit_text('Один и тот же клуб не может играть против себя!')
+        buttons_clubs = await kb.clubs(await request.get_all_clubs())
+        await callback.message.edit_text('Один и тот же клуб не может играть против себя!\n' \
+        'Выберите первый клуб ещё раз', reply_markup=buttons_clubs)
         await state.set_state(Admin.choice_left_club)
         return
     
