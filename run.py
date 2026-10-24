@@ -3,13 +3,10 @@ import logging
 from aiogram import Bot, Dispatcher
 
 from config import TOKEN
-from app.handlers.user_handlers import router as main_router
-from app.handlers.admin_handler import admin_router
-from app.handlers.regist_handler import regist_router
-from app.handlers.admin_add_statistic import admin_router as add_stat
-from app.handlers.admin_create_match import admin_router as create_match
 
 from app.database.models import async_main
+
+from app.handlers.routers import user_router, admin_router
 
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
@@ -18,11 +15,8 @@ dp = Dispatcher()
 # Бот бесконечно работает
 async def main():
     await async_main()
-    dp.include_router(add_stat)
-    dp.include_router(create_match)
     dp.include_router(admin_router)
-    dp.include_router(regist_router)
-    dp.include_router(main_router)
+    dp.include_router(user_router)
     await dp.start_polling(bot)
 
 
