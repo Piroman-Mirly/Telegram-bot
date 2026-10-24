@@ -28,7 +28,7 @@ filter_category = InlineKeyboardMarkup(inline_keyboard=[
 
 # Копки в таблице
 table_button = InlineKeyboardMarkup(inline_keyboard=[
-    [InlineKeyboardButton(text='Вернуться в профиль', callback_data='return_to_player_mm'), InlineKeyboardButton(text='Расписание на сегодня', callback_data='match_schedue')]
+    [InlineKeyboardButton(text='Вернуться в профиль', callback_data='return_to_player_mm'), InlineKeyboardButton(text='Расписание на сегодня', callback_data='schedule_today')]
 ])
 
 # Кнопки для регистрации
@@ -48,9 +48,10 @@ confirm_reg_kb = ReplyKeyboardMarkup(keyboard=[
 
 
 # Билдеры
+
 # Билдер, создающий расписание матчей в виде кнопок
-async def match_schedule():
-    all_matches = await get_all_matches() # Взято из request
+async def match_schedule(matches): # Передается кортеж матчей
+    all_matches = matches
     all_matches_kb = InlineKeyboardBuilder()
 
     for match in all_matches:

@@ -1,7 +1,7 @@
 from app.database.models import async_session
 from app.database.models import Player, Club, Coach, Statistic_per_match, Match, User
 from sqlalchemy.exc import IntegrityError
-from datetime import datetime
+from datetime import datetime, date
 
 from sqlalchemy import select, update, delete, func, desc
 
@@ -158,3 +158,14 @@ async def get_top_players(category: str = 'total', limit: int = 10):
 
         result = await session.execute(query)
         return result.all() # Список кортежей в формате: [(ник, клуб, атака, блок, подача, всего очков)]
+
+
+# Возвращает матчи конкретного дня
+async def get_target_date_matches(target_date: date):
+    async with async_session() as session:
+        query = (
+            select(Match).where(Match.date_match == target_date)
+            .order_by(Match.id) # Сортировка по времени создания
+        )
+        result = await session.scalars(query)
+        return result.all()
