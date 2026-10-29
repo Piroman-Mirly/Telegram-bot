@@ -17,7 +17,7 @@ async def create_player(tg_id: int, nickname: str, role: str):
         except IntegrityError:
             await session.rollback()
 
-
+# Создает новый матч в БД
 async def create_new_match(date: datetime, left_id: int, right_id: int):
     async with async_session() as session:
         match = Match(date_match=date, left_club_id=left_id, right_club_id=right_id)
@@ -26,6 +26,27 @@ async def create_new_match(date: datetime, left_id: int, right_id: int):
             await session.commit()
         except IntegrityError:
             await session.rollback()
+
+# Извлекает имя игрока из БД с помощью его айди
+async def get_nickname_player(player_id):
+    async with async_session() as session:
+        nickname = await session.scalar(select(Player.nickname_player).where(Player.id == player_id))
+        return nickname
+
+# Создает новую статистику игрока в БД
+async def create_statistic_player(attack: int, block: int, serve: int, player_id: int, match_id: int):
+    async with async_session() as session:
+        statistic = Statistic_per_match(attack_per_match=attack,
+                                        block_per_match=block,
+                                        serve_per_match=serve,
+                                        player_id=player_id,
+                                        match_id=match_id)
+        session.add(statistic)
+        
+        try:
+            await session.commit()
+        except IntegrityError:
+            await session.rollback()                                
 
 async def get_all_clubs(): # Функция передает данные всех клубов
     async with async_session() as session:

@@ -20,8 +20,8 @@ class Admin(StatesGroup):
     picking_match = State() # Судья выбрал матч
     picking_club = State() # Судья выбрал клуб
     picking_player = State() # Судья выбрал конкретного игрока
-    entering_stats = State() # Судья ввёл значения статистики конкретному игроку
-    confirming_match = State() # Судья подтвердил значения
+    entering_stats = State() # Судья вводит значения выбранному игроку
+    confirming_stats = State() # Судья подтвердил значения
 
  # Состояния для регистрации
 class Registration(StatesGroup):

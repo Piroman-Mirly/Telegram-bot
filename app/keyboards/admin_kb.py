@@ -21,6 +21,25 @@ to_mm_admin_panel = InlineKeyboardMarkup(inline_keyboard=[
     [InlineKeyboardButton(text='Вернуться в главное меню админ-панели', callback_data='to_mm_admin_panel')]
 ])
 
+# Кнопки для возвращения в меню добавления статистики
+# Вернуться к выбору игроков
+back_to_players = InlineKeyboardMarkup(inline_keyboard=[
+    [InlineKeyboardButton(text='К списку игроков', callback_data='back_to_players')]
+])
+# Вернуться к выбору клубов
+back_to_clubs = InlineKeyboardMarkup(inline_keyboard=[
+    [InlineKeyboardButton(text='К списук клубов', callback_data='back_to_clubs')]
+])
+# Вернуться к выбору матчей
+back_to_matches = InlineKeyboardMarkup(inline_keyboard=[
+    [InlineKeyboardButton(text='К списку матчей', callback_data='back_to_matches')]
+])
+
+# Кнопка для подтверждения статистики
+succses_statistic = InlineKeyboardMarkup(inline_keyboard=[
+    [InlineKeyboardButton(text='Подтвердить', callback_data='succses_statistic'), InlineKeyboardButton(text='К списку игроков', callback_data='back_to_players')]
+])
+
 # Кнопки для подтверждения создания матча
 confirm_create_match_btn = InlineKeyboardMarkup(inline_keyboard=[
     [InlineKeyboardButton(text='Подтвердить', callback_data='confirm_data_match')],
