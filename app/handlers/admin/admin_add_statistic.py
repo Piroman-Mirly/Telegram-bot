@@ -48,10 +48,27 @@ async def handle_select_current_player(callback: CallbackQuery, state: FSMContex
     
     club_id = int(callback.data.split('_')[-1])
 
+    data = await state.get_data()
+
+    match_id = int(data.get('match_id'))
+
     # Сохраняет данные клуба
     await state.update_data(club_id = club_id)
 
-    buttons = await adm_kb.players(club_id)
+    # Делаем запрос в БД, чтобы поместь в переменную игроков без статистики
+    unfilled_players = await request.get_unifillied_players(club_id, match_id)
+
+     # ВАЖНО: Проверяем, остались ли вообще игроки для заполнения
+    if not unfilled_players:
+        await callback.message.edit_text(
+            'Все игроки этого клуба уже имеют статистику за этот матч!\n'
+            'Вы можете вернуться назад и выбрать другой клуб',
+            reply_markup=adm_kb.back_to_clubs # Кнопка возврата
+        )
+        return
+
+    buttons = await adm_kb.list_players(unfilled_players)
+    
     await callback.message.edit_text(f'Выберите игрока, статистику которого вы хотите добавить / изменить:',
                                             reply_markup=buttons)
                                             # В функцию передается разделенный коллбек, из которого извлекается айди клуба
@@ -66,6 +83,7 @@ async def handle_add_statistic_player(callback: CallbackQuery, state: FSMContext
     
     # Запоминает айди игрока, которому необходимо записать статистику
     await state.update_data(player_id = player_id)
+    
 
     await callback.message.edit_text('Введите статистику игрока за матч в формате:\n' \
     'Атака, блок, подача', reply_markup=adm_kb.back_to_players)

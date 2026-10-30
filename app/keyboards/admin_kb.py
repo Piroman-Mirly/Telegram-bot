@@ -3,8 +3,8 @@ from aiogram.types import (ReplyKeyboardMarkup, KeyboardButton,
 
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from app.database.requests import get_all_clubs, get_all_players_in_club, get_all_matches, get_name_club
-
+from app.database.requests import (get_all_clubs, get_all_players_in_club, get_all_matches, get_name_club,
+                                   get_unifillied_players)
 # Для главного экрана
 admin_buttons = InlineKeyboardMarkup(inline_keyboard=[
     [InlineKeyboardButton(text='Добавить статистику матча', callback_data='on_statistic_for_match'), InlineKeyboardButton(text='Добавить матч', callback_data='add_new_match')],
@@ -28,7 +28,7 @@ back_to_players = InlineKeyboardMarkup(inline_keyboard=[
 ])
 # Вернуться к выбору клубов
 back_to_clubs = InlineKeyboardMarkup(inline_keyboard=[
-    [InlineKeyboardButton(text='К списук клубов', callback_data='back_to_clubs')]
+    [InlineKeyboardButton(text='К списку клубов', callback_data='back_to_clubs')]
 ])
 # Вернуться к выбору матчей
 back_to_matches = InlineKeyboardMarkup(inline_keyboard=[
@@ -63,12 +63,15 @@ async def clubs(clubs):
     # Возвращает все клубы в виде кнопок
     return all_clubs_kb.adjust(2).as_markup() # adjust отвечает за то, сколько кнопок будет в одном ряду
 
-# Билдер, создающий кнопки из игроков
-async def players(club_id):
-    all_players = await get_all_players_in_club(club_id) # Взято из request
+# Билдер, создающий кнопки из игроков, у которых ещё нет статистики в матче
+async def list_players(players):
     all_players_kb = InlineKeyboardBuilder()
 
-    for player in all_players:
+    if not players:
+        all_players_kb.button(text="К выбору клубов", callback_data="back_to_clubs")
+        return all_players_kb.as_markup()
+
+    for player in players:
         all_players_kb.add(InlineKeyboardButton(text=player.nickname_player, callback_data=f"player_{player.id}"))
     all_players_kb.add(InlineKeyboardButton(text='На главную', callback_data='on_statistic_for_match'))
     # Возвращает всех игроков в клубе в виде кнопок
@@ -87,3 +90,4 @@ async def matches():
                                                 callback_data=f'match_{match.id}'))
     all_matches_kb.add(InlineKeyboardButton(text='Вернуться в главное меню админ-панели', callback_data='to_mm_admin_panel'))
     return all_matches_kb.adjust(1).as_markup()
+

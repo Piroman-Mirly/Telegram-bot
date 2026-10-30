@@ -63,6 +63,19 @@ async def get_all_players_in_club(club_id):
         players = await session.scalars(select(Player).where(Player.club_id == club_id))
         return players
 
+# Функция возвращает только тех игроков, у которых нет статистики
+async def get_unifillied_players(club_id: int, match_id: int):
+    async with async_session() as session:
+        # Находим айди всех игроков, у которых уже есть статистика
+        filled_player_subquery = (select(Statistic_per_match.player_id)
+                                  .where(Statistic_per_match.match_id == match_id)
+                                  )
+        # Основной запрос
+        query = (select(Player).where(Player.club_id == club_id)
+                 .where(Player.id.not_in(filled_player_subquery)))
+        result = await session.scalars(query)
+        return result.all()
+
 # Функция получает на вход телеграмм айди игрока, а возвращает его обычное айди
 async def get_player_id(telegram_id):
     async with async_session() as session:
