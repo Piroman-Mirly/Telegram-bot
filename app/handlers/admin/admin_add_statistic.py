@@ -19,7 +19,12 @@ admin_router = Router()
 async def hundle_add_player_statistic(callback: CallbackQuery, state: FSMContext):
     await state.set_state(Admin.picking_match)
     await callback.answer()
-    buttons = await adm_kb.matches()
+
+    # Берёт только незаполненные матчи из БД
+    schedule_matches = await request.schedule_matches()
+
+    buttons = await adm_kb.matches(schedule_matches)
+
     await callback.message.edit_text('Выберите подходящий матч', reply_markup=buttons)
 
 # Добавление статистики в конкретный матч

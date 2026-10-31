@@ -57,6 +57,12 @@ async def get_name_club(club_id): # Функция возвращает назв
         return await session.scalar(select(Club.name_club).where(Club.id == club_id))
 
 
+# Возвращает только матчи, которые ещё незаполнены
+async def schedule_matches():
+    async with async_session() as session:
+        matches = await session.scalars(select(Match).where(Match.status == 'scheduled'))
+        return matches.all()
+
 # Функция получает на вход айди клуба и сравнивает его со всеми игроками, после чего возвращает всех найденных игроков клуба
 async def get_all_players_in_club(club_id):
     async with async_session() as session:

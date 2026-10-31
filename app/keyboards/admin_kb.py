@@ -78,14 +78,14 @@ async def list_players(players):
     return all_players_kb.adjust(1).as_markup()
 
 # Билдер, создающий список всех матчей в виде кнопок
-async def matches():
-    all_matches = await get_all_matches() # Взято из request
+async def matches(matches):
+    all_matches = matches # Передает все нужные матчи
     all_matches_kb = InlineKeyboardBuilder()
 
-    for match in all_matches:
+    for count, match in enumerate(all_matches, start = 1):
         left_name_club = await get_name_club(match.left_club_id) # Возвращает имя клуба слева
         right_name_club = await get_name_club(match.right_club_id) # Возвращает имя клуба справа
-        all_matches_kb.add(InlineKeyboardButton(text=f'{match.id}.'
+        all_matches_kb.add(InlineKeyboardButton(text=f'{count}. '
                                                 f'{left_name_club} {match.score_left} - {match.score_right} {right_name_club}',
                                                 callback_data=f'match_{match.id}'))
     all_matches_kb.add(InlineKeyboardButton(text='Вернуться в главное меню админ-панели', callback_data='to_mm_admin_panel'))
