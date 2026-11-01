@@ -49,10 +49,27 @@ async def handle_add_statistic_in_current_match(callback: CallbackQuery, state: 
     await callback.message.edit_text('Выберите клуб, статистику игроков которых вы желаете внести:', reply_markup=buttons)
 
 # Возврат к выбору клуба
-@admin_router.callback_query(F.data == 'back_to_clubs', StateFilter(Admin.picking_match))
+@admin_router.callback_query(F.data == 'back_to_clubs') 
 async def handle_back_to_clubs(callback: CallbackQuery, state: FSMContext):
-
+    await state.set_state(Admin.picking_club)
     await callback.answer()
+
+    data = await state.get_data()
+
+    # Достает айди матча из FSM
+    match_id = int(data.get('match_id'))
+
+    # Достает объекты клубов из айди матча
+    clubs = await request.get_two_club_id_in_match(match_id)
+
+    # Кнопки клубов
+    buttons = await adm_kb.clubs(clubs) # Клубы передаются в билдер кнопок
+
+    await callback.message.edit_text('Выберите клуб, статистику игроков которых вы желаете внести:', reply_markup=buttons)
+
+
+
+
 
 
 
