@@ -17,6 +17,7 @@ admin_router = Router()
 # Коллбек, который даёт админу выбрать матч для заполнения статистики
 @admin_router.callback_query(F.data == 'on_statistic_for_match')
 async def hundle_add_player_statistic(callback: CallbackQuery, state: FSMContext):
+    await state.clear()
     await state.set_state(Admin.picking_match)
     await callback.answer()
 
@@ -27,9 +28,11 @@ async def hundle_add_player_statistic(callback: CallbackQuery, state: FSMContext
 
     await callback.message.edit_text('Выберите подходящий матч', reply_markup=buttons)
 
+
+
 # Добавление статистики в конкретный матч
 @admin_router.callback_query(F.data.startswith('match_'), StateFilter(Admin.picking_match))
-async def handle_add_statis_in_current_match(callback: CallbackQuery, state: FSMContext):
+async def handle_add_statistic_in_current_match(callback: CallbackQuery, state: FSMContext):
     await state.set_state(Admin.picking_club)
     await callback.answer()
 
@@ -44,6 +47,13 @@ async def handle_add_statis_in_current_match(callback: CallbackQuery, state: FSM
 
 
     await callback.message.edit_text('Выберите клуб, статистику игроков которых вы желаете внести:', reply_markup=buttons)
+
+# Возврат к выбору клуба
+@admin_router.callback_query(F.data == 'back_to_clubs', StateFilter(Admin.picking_match))
+async def handle_back_to_clubs(callback: CallbackQuery, state: FSMContext):
+
+    await callback.answer()
+
 
 
 # Показывает всех игроков в данном клубе

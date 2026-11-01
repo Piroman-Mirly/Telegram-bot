@@ -32,7 +32,7 @@ back_to_clubs = InlineKeyboardMarkup(inline_keyboard=[
 ])
 # Вернуться к выбору матчей
 back_to_matches = InlineKeyboardMarkup(inline_keyboard=[
-    [InlineKeyboardButton(text='К списку матчей', callback_data='back_to_matches')]
+    [InlineKeyboardButton(text='К списку матчей', callback_data='on_statistic_for_match')]
 ])
 
 # Кнопка для подтверждения статистики
