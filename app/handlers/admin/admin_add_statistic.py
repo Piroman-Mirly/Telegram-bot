@@ -90,7 +90,7 @@ async def handle_select_current_player(callback: CallbackQuery, state: FSMContex
     # Делаем запрос в БД, чтобы поместь в переменную игроков без статистики
     unfilled_players = await request.get_unifillied_players(club_id, match_id)
 
-     # ВАЖНО: Проверяем, остались ли вообще игроки для заполнения
+    # ВАЖНО: Проверяем, остались ли вообще игроки для заполнения
     if not unfilled_players:
         await callback.message.edit_text(
             'Все игроки этого клуба уже имеют статистику за этот матч!\n'
@@ -103,8 +103,37 @@ async def handle_select_current_player(callback: CallbackQuery, state: FSMContex
     
     await callback.message.edit_text(f'Выберите игрока, статистику которого вы хотите добавить / изменить:',
                                             reply_markup=buttons)
-                                            # В функцию передается разделенный коллбек, из которого извлекается айди клуба
     await state.set_state(Admin.picking_player)
+
+@admin_router.callback_query(F.data == 'back_to_players')
+async def handle_back_to_players(callback: CallbackQuery, state: FSMContext):
+    await callback.answer()
+
+    # Получаем айди клуба, в котором были игроки, плюс айди матча
+    data = await state.get_data()
+
+    club_id = data.get('club_id')
+    match_id = data.get('match_id')
+
+    # Делаем запрос в БД, чтобы поместь в переменную игроков без статистики
+    unfilled_players = await request.get_unifillied_players(club_id, match_id)
+
+    # ВАЖНО: Проверяем, остались ли вообще игроки для заполнения
+    if not unfilled_players:
+        await callback.message.edit_text(
+            'Все игроки этого клуба уже имеют статистику за этот матч!\n'
+            'Вы можете вернуться назад и выбрать другой клуб',
+            reply_markup=adm_kb.back_to_clubs # Кнопка возврата
+        )
+        return
+
+    buttons = await adm_kb.list_players(unfilled_players)
+    
+    await callback.message.edit_text(f'Выберите игрока, статистику которого вы хотите добавить / изменить:',
+                                            reply_markup=buttons)
+    await state.set_state(Admin.picking_player)
+
+
 
 # Просит вписать данные игрока
 @admin_router.callback_query(F.data.startswith('player_'), StateFilter(Admin.picking_player))
