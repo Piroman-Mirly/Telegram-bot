@@ -3,7 +3,7 @@ from app.database.models import Player, Club, Coach, Statistic_per_match, Match,
 from sqlalchemy.exc import IntegrityError
 from datetime import datetime, date
 
-from sqlalchemy import select, update, delete, func, desc
+from sqlalchemy import select, update, delete, func, desc, or_
 
 
 # Функция отвечает за добавление нового игрока
@@ -57,11 +57,48 @@ async def get_name_club(club_id): # Функция возвращает назв
         return await session.scalar(select(Club.name_club).where(Club.id == club_id))
 
 
-# Возвращает только матчи, которые ещё незаполнены
+# Возвращает матчи, которые ещё незаполнены
 async def schedule_matches():
     async with async_session() as session:
         matches = await session.scalars(select(Match).where(Match.status == 'scheduled'))
         return matches.all()
+
+# Возвращает матчи, счёт которых ещё незаполнен
+async def none_score_matches():
+    async with async_session() as session:
+        matches = await session.scalars(select(Match).where(or_(Match.score_left == None, Match.score_right == None)))
+        return matches.all()
+
+# Функции, которые возвращают левый и правые айди клубов
+async def get_left_club_id(match_id):
+    async with async_session() as session:
+        query = await session.scalar(select(Match.left_club_id).where(Match.id == match_id))
+
+        return query
+
+async def get_right_club_id(match_id):
+    async with async_session() as session:
+        query = await session.scalar(select(Match.right_club_id).where(Match.id == match_id))
+
+        return query
+
+# Возвращает конкретный матч по id
+async def get_match_by_id(match_id):
+    async with async_session() as session:
+        query = await session.scalar(select(Match).where(Match.id == match_id))
+        return query
+
+# Обновляет существующий матч в БД
+async def update_match_score(match_id: int, score_left: int, score_right: int, winner_id: int):
+    async with async_session() as session:
+        query = (update(Match).where(Match.id == match_id)
+                 .values(score_left = score_left,
+                         score_right = score_right,
+                         winner_id = winner_id,
+                         status = 'finished'))
+        await session.execute(query)
+        await session.commit()
+
 
 # Функция получает на вход айди клуба и сравнивает его со всеми игроками, после чего возвращает всех найденных игроков клуба
 async def get_all_players_in_club(club_id):

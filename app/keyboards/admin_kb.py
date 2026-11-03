@@ -7,7 +7,9 @@ from app.database.requests import (get_all_clubs, get_all_players_in_club, get_a
                                    get_unifillied_players)
 # Для главного экрана
 admin_buttons = InlineKeyboardMarkup(inline_keyboard=[
-    [InlineKeyboardButton(text='Добавить статистику матча', callback_data='on_statistic_for_match'), InlineKeyboardButton(text='Добавить матч', callback_data='add_new_match')],
+    [InlineKeyboardButton(text='Добавить статистику матча', callback_data='on_statistic_for_match')], 
+    [InlineKeyboardButton(text='Добавить матч', callback_data='add_new_match')], 
+    [InlineKeyboardButton(text='Добавить счёт встречи', callback_data='add_score_match')],
     [InlineKeyboardButton(text='Выйти из админ-панели',callback_data='return_to_player_state')]
 ])
 
@@ -94,3 +96,13 @@ async def matches(matches):
     all_matches_kb.add(InlineKeyboardButton(text='Вернуться в главное меню админ-панели', callback_data='to_mm_admin_panel'))
     return all_matches_kb.adjust(1).as_markup()
 
+def set_score_kb(match_id : int, side: str, club_name : str):
+    kb = InlineKeyboardBuilder()
+    kb.button(text=f"{club_name} — 0 партий", callback_data=f"setscore_{match_id}_{side}_0")
+    kb.button(text=f"{club_name} — 1 партия", callback_data=f"setscore_{match_id}_{side}_1")
+    kb.button(text=f"{club_name} — 2 партии", callback_data=f"setscore_{match_id}_{side}_2")
+    kb.button(text=f"{club_name} — 3 партии", callback_data=f"setscore_{match_id}_{side}_3")
+    
+    kb.button(text="Назад к выбору матча", callback_data="add_score_match")
+    kb.adjust(1)
+    return kb.as_markup()

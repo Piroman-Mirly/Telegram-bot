@@ -23,6 +23,10 @@ class Admin(StatesGroup):
     entering_stats = State() # Судья вводит значения выбранному игроку
     confirming_stats = State() # Судья подтвердил значения
 
+    # Запись счёта
+    picking_match_for_score = State() #Судья добавляет счёт клубам
+    confirming_score = State()
+
  # Состояния для регистрации
 class Registration(StatesGroup):
     # Бот ждёт имя
