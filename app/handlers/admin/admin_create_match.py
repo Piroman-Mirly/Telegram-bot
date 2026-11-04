@@ -6,7 +6,11 @@ from aiogram.fsm.context import FSMContext
 # Импорты из самого бота
 from app.states import Admin
 import app.keyboards.admin_kb as adm_kb
-import app.database.requests as request
+
+# Импорты из реквестов
+import app.database.all_requests.clubs as r_clubs
+import app.database.all_requests.players as r_players
+import app.database.all_requests.matches as r_matches
 
 from datetime import datetime
 
@@ -38,7 +42,7 @@ async def handle_get_date_match(message: Message, state: FSMContext):
     # Сохранение данных в оперативную память FSM состояний
     await state.update_data(date = match_date)
     await state.set_state(Admin.choice_left_club)
-    buttons_clubs = await adm_kb.clubs(await request.get_all_clubs())
+    buttons_clubs = await adm_kb.clubs(await r_clubs.get_all_clubs())
     await message.answer('Выберите клуб, который играл на домашнем поле', reply_markup=buttons_clubs)
 
 
@@ -48,12 +52,12 @@ async def trap_left_club(message: Message, state: FSMContext):
     await message.answer('Пожалуйста, выберите клуб, нажав на одну из кнопок выше')
 
 
-# Айди первого клуба заносится в оперативную память, вбот предлагает выбрать второй клуб
+# Айди первого клуба заносится в оперативную память, бот предлагает выбрать второй клуб
 @admin_router.callback_query(F.data.startswith('club_'), StateFilter(Admin.choice_left_club))
 async def claim_left_club(callback: CallbackQuery, state: FSMContext):
     await callback.answer()
 
-    buttons_clubs = await adm_kb.clubs(await request.get_all_clubs())
+    buttons_clubs = await adm_kb.clubs(await r_clubs.get_all_clubs())
     club_id = int(callback.data.split("_")[1])
     await state.update_data(left_club=club_id)
     await callback.message.edit_text('Первый клуб выбран, теперь выберите второй', reply_markup=buttons_clubs)
@@ -71,7 +75,7 @@ async def claim_right_club(callback: CallbackQuery, state: FSMContext):
 
     # Если первый и второй клуб похожи, то будет выведена ошибка
     if data.get('left_club') == club_id:
-        buttons_clubs = await adm_kb.clubs(await request.get_all_clubs())
+        buttons_clubs = await adm_kb.clubs(await r_clubs.get_all_clubs())
         await callback.message.edit_text('Один и тот же клуб не может играть против себя!\n' \
         'Выберите первый клуб ещё раз', reply_markup=buttons_clubs)
         await state.set_state(Admin.choice_left_club)
@@ -82,8 +86,8 @@ async def claim_right_club(callback: CallbackQuery, state: FSMContext):
     data = await state.get_data()
 
     # Названия двух клубов
-    left_club = await request.get_name_club(data.get('left_club'))
-    right_club = await request.get_name_club(data.get('right_club'))
+    left_club = await r_clubs.get_name_club(data.get('left_club'))
+    right_club = await r_clubs.get_name_club(data.get('right_club'))
 
     await callback.message.edit_text(f'Матч создан, проверьте данные:\n\n' \
     f'Дата: {data.get('date')}\n'
@@ -96,7 +100,7 @@ async def confirm_create_match(callback: CallbackQuery, state: FSMContext):
     await callback.answer()
 
     data = await state.get_data()
-    await request.create_new_match(data['date'], data['left_club'], data['right_club'])
+    await r_matches.create_new_match(data['date'], data['left_club'], data['right_club'])
 
 
     await callback.message.edit_text('Данные успешно сохранены', reply_markup=adm_kb.to_mm_admin_panel)

@@ -6,7 +6,11 @@ from aiogram.types import CallbackQuery
 #from aiogram.fsm.context import FSMContext
 
 from app.middlewares import TestMiddleware
-import app.database.requests as request
+
+# Импорты из реквестов
+import app.database.all_requests.clubs as r_clubs
+#import app.database.all_requests.players as r_players
+#import app.database.all_requests.matches as r_matches
 
 import app.keyboards.keyboards as user_kb
 from app.states import Admin
@@ -20,7 +24,7 @@ router = Router()
 async def handle_table_league(callback: CallbackQuery):
     await callback.answer()
     # Из файла request данные о текущих местах клуба передаются в переменную
-    places_in_table = await request.get_data_for_table_clubs()
+    places_in_table = await r_clubs.get_data_for_table_clubs()
 
     # Отправная точка для создания единого сообщения
     head = ["Место", "Название", "Кол-во побед", "Кол-во очков"]

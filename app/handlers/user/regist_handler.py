@@ -4,8 +4,12 @@ from aiogram.types import Message, CallbackQuery, ReplyKeyboardRemove
 from aiogram.fsm.context import FSMContext
 
 import app.keyboards.keyboards as kb
-import app.database.requests as request
 from app.states import Registration
+
+# Импорты из реквестов
+import app.database.all_requests.clubs as r_clubs
+import app.database.all_requests.players as r_players
+import app.database.all_requests.matches as r_matches
 
 regist_router = Router()
 
@@ -53,7 +57,7 @@ async def trap_role(message: Message):
 @regist_router.message(Registration.confirm_reg, F.text == "Сохранить")
 async def save_data(message: Message, state: FSMContext):
     data = await state.get_data()
-    await request.create_player(data['tg_id'], data['nickname'], data['role'])
+    await r_players.create_player(data['tg_id'], data['nickname'], data['role'])
     await message.answer(
         f"Готово! Ник: {data['nickname']}, позиция: {data['role']}",
         reply_markup=ReplyKeyboardRemove()

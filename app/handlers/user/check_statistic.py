@@ -6,7 +6,11 @@ from aiogram.types import CallbackQuery
 from aiogram.fsm.context import FSMContext
 
 from app.middlewares import TestMiddleware
-import app.database.requests as request
+
+# Импорты из реквестов
+import app.database.all_requests.clubs as r_clubs
+import app.database.all_requests.players as r_players
+import app.database.all_requests.matches as r_matches
 
 import app.keyboards.keyboards as user_kb
 from app.states import Admin
@@ -25,9 +29,9 @@ async def handle_statistic_main_player(callback: CallbackQuery):
     point_per_serve = 0
 
     # Находим айди пользователя через его тг-айди
-    player_id = await request.get_player_id(callback.from_user.id)
+    player_id = await r_players.get_player_id(callback.from_user.id)
     # Данные о всех матчах игрока передаются в переменную
-    all_stat_matches = await request.get_all_points_player(player_id)
+    all_stat_matches = await r_players.get_all_points_player(player_id)
 
 
 
@@ -49,7 +53,7 @@ async def handle_check_statistic_current_player(callback: CallbackQuery):
     # Айди игрока передается через коллбек в переменную
     player_id = int(callback.data.split('_')[-1])
     # Данные о всех матчах игрока передаются в переменную
-    all_stat_matches = await request.get_all_points_player(player_id)
+    all_stat_matches = await r_players.get_all_points_player(player_id)
 
 
     await callback.answer()

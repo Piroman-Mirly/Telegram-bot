@@ -3,8 +3,11 @@ from aiogram.types import (ReplyKeyboardMarkup, KeyboardButton,
 
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from app.database.requests import (get_all_clubs, get_all_players_in_club, get_all_matches, get_name_club,
-                                   get_unifillied_players)
+# Импорты из реквестов
+import app.database.all_requests.clubs as r_clubs
+#import app.database.all_requests.players as r_players
+#import app.database.all_requests.matches as r_matches
+
 # Для главного экрана
 admin_buttons = InlineKeyboardMarkup(inline_keyboard=[
     [InlineKeyboardButton(text='Добавить статистику матча', callback_data='on_statistic_for_match')], 
@@ -88,8 +91,8 @@ async def matches(matches):
     all_matches_kb = InlineKeyboardBuilder()
 
     for count, match in enumerate(all_matches, start = 1):
-        left_name_club = await get_name_club(match.left_club_id) # Возвращает имя клуба слева
-        right_name_club = await get_name_club(match.right_club_id) # Возвращает имя клуба справа
+        left_name_club = await r_clubs.get_name_club(match.left_club_id) # Возвращает имя клуба слева
+        right_name_club = await r_clubs.get_name_club(match.right_club_id) # Возвращает имя клуба справа
         all_matches_kb.add(InlineKeyboardButton(text=f'{count}. '
                                                 f'{left_name_club} {match.score_left} - {match.score_right} {right_name_club}',
                                                 callback_data=f'match_{match.id}'))

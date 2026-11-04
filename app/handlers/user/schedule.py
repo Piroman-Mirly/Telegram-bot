@@ -10,8 +10,12 @@ from app.middlewares import TestMiddleware
 #import app.database.requests as request
 
 import app.keyboards.keyboards as user_kb
-import app.database.requests as request
 from app.states import Admin
+
+# Импорты из реквестов
+#import app.database.all_requests.clubs as r_clubs
+import app.database.all_requests.players as r_players
+#import app.database.all_requests.matches as r_matches
 
 router = Router()
 
@@ -27,6 +31,6 @@ async def get_match_schedule(callback: CallbackQuery, state: FSMContext):
     today = date.today()
 
     # Передаются все матчи нужной даты
-    all_matches = await request.get_target_date_matches(today)
+    all_matches = await r_players.get_target_date_matches(today)
     matches_btn = await user_kb.match_schedule(all_matches)
     await callback.message.edit_text('Расписание на сегодня', reply_markup=matches_btn)

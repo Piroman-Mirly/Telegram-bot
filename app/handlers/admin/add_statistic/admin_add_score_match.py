@@ -8,7 +8,11 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 # Импорты из самого бота
 from app.states import Admin
 import app.keyboards.admin_kb as adm_kb
-import app.database.requests as request
+
+# Импорты из реквестов
+import app.database.all_requests.clubs as r_clubs
+import app.database.all_requests.players as r_players
+import app.database.all_requests.matches as r_matches
 
 
 
@@ -23,7 +27,7 @@ async def handle_picked_match(callback: CallbackQuery, state: FSMContext):
     await state.set_state(Admin.picking_match_for_score)
 
     # Матчи, которым необходимо заполнить счёт
-    current_matches = await request.none_score_matches()
+    current_matches = await r_matches.none_score_matches()
 
     # Если матчей нет
     if not current_matches:
@@ -36,8 +40,8 @@ async def handle_picked_match(callback: CallbackQuery, state: FSMContext):
     # Создаем кнопки прямо тут
     for m in current_matches:
         # Сделать так, чтобы в самом реквесте появлялась табличка с именами клубов, чтобы брать их оттуда, а не делать запросы
-        left_club_name = await request.get_club_name(m.left_club_id)
-        right_club_name = await request.get_club_name(m.right_club_id)
+        left_club_name = await r_clubs.get_club_name(m.left_club_id)
+        right_club_name = await r_clubs.get_club_name(m.right_club_id)
         kb.button(text=f'{m.date_match} | {left_club_name} - {right_club_name}', callback_data=f'setmatch_{m.id}')
     kb.button(text='Назад', callback_data='to_mm_admin_panel')
     kb.adjust(1)
@@ -54,9 +58,9 @@ async def pick_left_score(callback: CallbackQuery, state: FSMContext):
     await state.update_data(match_id = match_id)
 
     # Получаем данные матча, чтобы узнать имя клуба
-    match = await request.get_match_by_id(match_id)
+    match = await r_matches.get_match_by_id(match_id)
 
-    left_name = await request.get_name_club(match.left_club_id)
+    left_name = await r_clubs.get_name_club(match.left_club_id)
 
     await callback.message.edit_text(
         f"Матч #{match_id}\nСколько партий взял домашний клуб ({left_name})?",
@@ -74,8 +78,8 @@ async def pick_right_score(callback: CallbackQuery, state: FSMContext):
     if side == "left":
         await state.update_data(score_left=score)
         
-        match = await request.get_match_by_id(match_id)
-        right_name = await request.get_name_club(match.right_club_id)
+        match = await r_matches.get_match_by_id(match_id)
+        right_name = await r_clubs.get_name_club(match.right_club_id)
         
         await callback.message.edit_text(
             f"Теперь сколько партий взял гостевой клуб ({right_name})?",
@@ -85,9 +89,9 @@ async def pick_right_score(callback: CallbackQuery, state: FSMContext):
         await state.update_data(score_right=score)
         data = await state.get_data()
         
-        match = await request.get_match_by_id(match_id)
-        left_name = await request.get_name_club(match.left_club_id)
-        right_name = await request.get_name_club(match.right_club_id)
+        match = await r_matches.get_match_by_id(match_id)
+        left_name = await r_clubs.get_name_club(match.left_club_id)
+        right_name = await r_clubs.get_name_club(match.right_club_id)
         
         text = (
             f"<b>Проверьте счёт матча:</b>\n"
@@ -115,12 +119,12 @@ async def save_match_score(callback: CallbackQuery, state: FSMContext):
     # Определяем победителя
     winner_id = None
     if score_left > score_right:
-        winner_id = await request.get_left_club_id(match_id) # Напиши функцию
+        winner_id = await r_clubs.get_left_club_id(match_id) # Напиши функцию
     elif score_right > score_left:
-        winner_id = await request.get_right_club_id(match_id) # Напиши функцию
+        winner_id = await r_clubs.get_right_club_id(match_id) # Напиши функцию
 
     # Написать функцию для изменения матча
-    await request.update_match_score(match_id, score_left, score_right, winner_id)
+    await r_matches.update_match_score(match_id, score_left, score_right, winner_id)
     await state.clear()
     
     await callback.message.edit_text(

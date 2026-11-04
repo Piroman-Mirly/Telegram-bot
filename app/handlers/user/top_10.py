@@ -6,7 +6,11 @@ from aiogram.types import CallbackQuery
 from aiogram.fsm.context import FSMContext
 
 from app.middlewares import TestMiddleware
-import app.database.requests as request
+
+# Импорты из реквестов
+#import app.database.all_requests.clubs as r_clubs
+import app.database.all_requests.players as r_players
+#import app.database.all_requests.matches as r_matches
 
 import app.keyboards.keyboards as user_kb
 from app.states import Admin
@@ -33,7 +37,7 @@ async def handle_top_players_statistic(callback: CallbackQuery):
     category = callback.data.split("_")[1]
 
     # Список кортежей в формате: [(ник, клуб, атака, блок, подача, всего очков)] с лимитом в 10 игроков
-    top = await request.get_top_players(category=category, limit=10)
+    top = await r_players.get_top_players(category=category, limit=10)
 
     # Переводим в человекочитаемый заголовок
     titles = {

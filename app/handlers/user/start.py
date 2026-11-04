@@ -6,7 +6,11 @@ from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
 
 from app.middlewares import TestMiddleware
-import app.database.requests as request
+
+# Импорты из реквестов
+import app.database.all_requests.clubs as r_clubs
+import app.database.all_requests.players as r_players
+import app.database.all_requests.matches as r_matches
 
 import app.keyboards.keyboards as user_kb
 from app.states import Admin, Registration
@@ -22,7 +26,7 @@ router = Router()
 async def cmd_start(message: Message, state: FSMContext):
     await state.set_state(Admin.normal)
 
-    data_player = await request.get_statistic_current_player(message.from_user.id)
+    data_player = await r_players.get_statistic_current_player(message.from_user.id)
 
     # Если вернули None, то значит такого пользователя нет и начинается регистрация
     if not data_player:
@@ -32,7 +36,7 @@ async def cmd_start(message: Message, state: FSMContext):
 
 
     # В будущем переделать на один запрос с JOIN
-    club_name = await request.get_club_name(data_player.club_id)
+    club_name = await r_clubs.get_club_name(data_player.club_id)
     await message.answer(f'———Главный экран———'
                                      f'\nВаш игровой ник: {data_player.nickname_player}'
                                      f'\nНазвание клуба: {club_name}'
@@ -50,9 +54,9 @@ async def delete_all_message(message: Message, state: FSMContext):
 @router.callback_query(F.data == "return_to_player_mm", StateFilter(Admin.normal))
 async def handle_return_to_player_mm(callback : CallbackQuery):
     await callback.answer()
-    data_player = await request.get_statistic_current_player(callback.from_user.id)
+    data_player = await r_players.get_statistic_current_player(callback.from_user.id)
     # В будущем переделать на один запрос с JOIN
-    club_name = await request.get_club_name(data_player.club_id)
+    club_name = await r_players.get_club_name(data_player.club_id)
     # Меняет последний текст бота на статистику игрока.
     await callback.message.edit_text(f'———Главный экран———'
                                      f'\nВаш игровой ник: {data_player.nickname_player}'

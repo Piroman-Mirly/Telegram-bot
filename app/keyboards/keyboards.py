@@ -4,7 +4,10 @@ from aiogram.types import (ReplyKeyboardMarkup, KeyboardButton,
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 
-from app.database.requests import *
+# Импорты из реквестов
+import app.database.all_requests.clubs as r_clubs
+import app.database.all_requests.players as r_players
+import app.database.all_requests.matches as r_matches
 
 # Кнопки в профиле игрока
 player_kb = InlineKeyboardMarkup(inline_keyboard=[
@@ -55,8 +58,8 @@ async def match_schedule(matches): # Передается кортеж матч�
     all_matches_kb = InlineKeyboardBuilder()
 
     for match in all_matches:
-        left_name_club = await get_name_club(match.left_club_id) # Возвращает имя клуба слева
-        right_name_club = await get_name_club(match.right_club_id) # Возвращает имя клуба справа
+        left_name_club = await r_clubs.get_name_club(match.left_club_id) # Возвращает имя клуба слева
+        right_name_club = await r_clubs.get_name_club(match.right_club_id) # Возвращает имя клуба справа
         all_matches_kb.add(InlineKeyboardButton(text=f'{match.date_match} '
                                                 f'{left_name_club} - {right_name_club}',
                                                 callback_data=f'match_{match.id}'))

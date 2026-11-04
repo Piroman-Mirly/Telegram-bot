@@ -7,7 +7,11 @@ from aiogram.fsm.context import FSMContext
 # Импорты из самого бота
 from app.states import Admin
 import app.keyboards.admin_kb as adm_kb
-import app.database.requests as request
+
+# Импорты из реквестов
+import app.database.all_requests.clubs as r_clubs
+import app.database.all_requests.players as r_players
+import app.database.all_requests.matches as r_matches
 
 
 
@@ -23,7 +27,7 @@ async def hundle_add_player_statistic(callback: CallbackQuery, state: FSMContext
     await callback.answer()
 
     # Берёт только незаполненные матчи из БД
-    schedule_matches = await request.schedule_matches()
+    schedule_matches = await r_matches.schedule_matches()
 
     buttons = await adm_kb.matches(schedule_matches)
 
@@ -38,7 +42,7 @@ async def handle_add_statistic_in_current_match(callback: CallbackQuery, state: 
     await callback.answer()
 
     # Достает объекты клубов из айди матча
-    clubs = await request.get_two_club_id_in_match(int(callback.data.split('_')[-1]))
+    clubs = await r_clubs.get_two_club_id_in_match(int(callback.data.split('_')[-1]))
 
     # Запоминает айди выбранного матча
     await state.update_data(match_id = int(callback.data.split('_')[-1]))
@@ -61,7 +65,7 @@ async def handle_back_to_clubs(callback: CallbackQuery, state: FSMContext):
     match_id = int(data.get('match_id'))
 
     # Достает объекты клубов из айди матча
-    clubs = await request.get_two_club_id_in_match(match_id)
+    clubs = await r_clubs.get_two_club_id_in_match(match_id)
 
     # Кнопки клубов
     buttons = await adm_kb.clubs(clubs) # Клубы передаются в билдер кнопок
@@ -89,7 +93,7 @@ async def handle_select_current_player(callback: CallbackQuery, state: FSMContex
     await state.update_data(club_id = club_id)
 
     # Делаем запрос в БД, чтобы поместь в переменную игроков без статистики
-    unfilled_players = await request.get_unifillied_players(club_id, match_id)
+    unfilled_players = await r_players.get_unifillied_players(club_id, match_id)
 
     # ВАЖНО: Проверяем, остались ли вообще игроки для заполнения
     if not unfilled_players:
@@ -117,7 +121,7 @@ async def handle_back_to_players(callback: CallbackQuery, state: FSMContext):
     match_id = data.get('match_id')
 
     # Делаем запрос в БД, чтобы поместь в переменную игроков без статистики
-    unfilled_players = await request.get_unifillied_players(club_id, match_id)
+    unfilled_players = await r_players.get_unifillied_players(club_id, match_id)
 
     # ВАЖНО: Проверяем, остались ли вообще игроки для заполнения
     if not unfilled_players:
@@ -163,7 +167,7 @@ async def handle_entering_statistic_player(message: Message, state: FSMContext):
     player_id = data.get('player_id')
 
     # Узнаем имя игрока
-    nickname_player = await request.get_nickname_player(player_id)
+    nickname_player = await r_players.get_nickname_player(player_id)
 
     # Убираем все лишние пробелы и разбиваем по запятой (работает и для "3,5,0", и для "3, 5, 0")
     cleaned_text = all_statistic.replace(" ", "")
@@ -227,7 +231,7 @@ async def handle_confirm_stats(callback: CallbackQuery, state: FSMContext):
     block = data.get('block')
     serve = data.get('serve')
 
-    await request.create_statistic_player(attack, block, serve, player_id, match_id)
+    await r_players.create_statistic_player(attack, block, serve, player_id, match_id)
 
     await callback.message.edit_text('Данные успешно занесены в базу данных', reply_markup=adm_kb.back_to_matches)
 
