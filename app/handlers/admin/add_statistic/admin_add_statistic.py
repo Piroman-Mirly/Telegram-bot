@@ -62,7 +62,12 @@ async def handle_back_to_clubs(callback: CallbackQuery, state: FSMContext):
     data = await state.get_data()
 
     # Достает айди матча из FSM
-    match_id = int(data.get('match_id'))
+    match_id = data.get('match_id')
+    # Если каким-то чудом айди матча не записалось, то просим пользователя перезапустить сессию
+    if not match_id:
+        await callback.message.edit_text("Сессия устарела. Начните заново", reply_markup=adm_kb.to_mm_admin_panel)
+        await state.clear()
+        return
 
     # Достает объекты клубов из айди матча
     clubs = await r_clubs.get_two_club_id_in_match(match_id)
@@ -120,6 +125,12 @@ async def handle_back_to_players(callback: CallbackQuery, state: FSMContext):
     club_id = data.get('club_id')
     match_id = data.get('match_id')
 
+    # Если каким-то чудом айди клуба не записалось, то просим пользователя перезапустить сессию
+    if not match_id:
+        await callback.message.edit_text("Сессия устарела. Начните заново", reply_markup=adm_kb.to_mm_admin_panel)
+        await state.clear()
+        return
+
     # Делаем запрос в БД, чтобы поместь в переменную игроков без статистики
     unfilled_players = await r_players.get_unifillied_players(club_id, match_id)
 
@@ -159,6 +170,10 @@ async def handle_add_statistic_player(callback: CallbackQuery, state: FSMContext
 # Предварительный этап перед подтверждением данных
 @admin_router.message(Admin.entering_stats)
 async def handle_entering_statistic_player(message: Message, state: FSMContext):
+    # Если отправлен не текст, то бот предупредит об этом
+    if not message.text:
+        await message.answer("Пожалуйста, отправьте текст в формате: 3, 5, 0")
+        return
     # Получаем статистику от судьи
     all_statistic = message.text.strip()
 
@@ -231,7 +246,12 @@ async def handle_confirm_stats(callback: CallbackQuery, state: FSMContext):
     block = data.get('block')
     serve = data.get('serve')
 
-    await r_players.create_statistic_player(attack, block, serve, player_id, match_id)
+    succses = await r_players.create_statistic_player(attack, block, serve, player_id, match_id)
+    # Проверка на успешную запись данных в БД
+    if succses:
+        await callback.message.edit_text('Данные успешно занесены в базу данных', reply_markup=adm_kb.back_to_matches)
+    else:
+        await callback.message.edit_text('Ошибка записи. Попробуйте ещё раз', reply_markup=adm_kb.back_to_players)
 
-    await callback.message.edit_text('Данные успешно занесены в базу данных', reply_markup=adm_kb.back_to_matches)
+
 

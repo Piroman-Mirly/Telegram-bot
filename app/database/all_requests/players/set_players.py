@@ -13,12 +13,25 @@ async def create_player(tg_id: int, nickname: str, role: str):
         # Попытка записать. Если ошибка, то гг :(
         try:
             await session.commit()
+            return True
         except IntegrityError:
             await session.rollback()
+            return False
 
 # Создает новую статистику игрока в БД
 async def create_statistic_player(attack: int, block: int, serve: int, player_id: int, match_id: int):
     async with async_session() as session:
+        # Доп проверка. Если такая статистика есть, то новую мы не создаем
+        existing = await session.scalar(
+            select(Statistic_per_match)
+            .where(Statistic_per_match.player_id == player_id)
+            .where(Statistic_per_match.match_id == match_id)
+        )
+
+        if existing:
+            return False # Статистика уже есть, не дублируем
+
+
         statistic = Statistic_per_match(attack_per_match=attack,
                                         block_per_match=block,
                                         serve_per_match=serve,
@@ -28,5 +41,7 @@ async def create_statistic_player(attack: int, block: int, serve: int, player_id
         
         try:
             await session.commit()
+            return True
         except IntegrityError:
             await session.rollback()  
+            return False
