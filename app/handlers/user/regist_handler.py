@@ -57,12 +57,15 @@ async def trap_role(message: Message):
 @regist_router.message(Registration.confirm_reg, F.text == "Сохранить")
 async def save_data(message: Message, state: FSMContext):
     data = await state.get_data()
-    await r_players.create_player(data['tg_id'], data['nickname'], data['role'])
-    await message.answer(
-        f"Готово! Ник: {data['nickname']}, позиция: {data['role']}",
-        reply_markup=ReplyKeyboardRemove()
-    )
-    await state.clear()
+    succses = await r_players.create_player(data['tg_id'], data['nickname'], data['role'])
+    if succses:
+        await message.answer(
+            f"Готово! Ник: {data['nickname']}, позиция: {data['role']}",
+            reply_markup=ReplyKeyboardRemove()
+        )
+        await state.clear()
+    else:
+        await message.answer('Ошибка записи данных. Перезапустите бота и попробуйте ещё раз')
 
 # Изменение позиции
 @regist_router.message(Registration.confirm_reg, F.text == "Изменить роль")
