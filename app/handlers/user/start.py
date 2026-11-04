@@ -8,9 +8,9 @@ from aiogram.fsm.context import FSMContext
 from app.middlewares import TestMiddleware
 
 # Импорты из реквестов
-import app.database.all_requests.clubs as r_clubs
-import app.database.all_requests.players as r_players
-import app.database.all_requests.matches as r_matches
+from app.database.all_requests import clubs as r_clubs
+from app.database.all_requests import players as r_players
+from app.database.all_requests import matches as r_matches
 
 import app.keyboards.keyboards as user_kb
 from app.states import Admin, Registration

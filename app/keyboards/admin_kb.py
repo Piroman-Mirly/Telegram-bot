@@ -4,9 +4,9 @@ from aiogram.types import (ReplyKeyboardMarkup, KeyboardButton,
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 # Импорты из реквестов
-import app.database.all_requests.clubs as r_clubs
-#import app.database.all_requests.players as r_players
-#import app.database.all_requests.matches as r_matches
+from app.database.all_requests import clubs as r_clubs
+#from app.database.all_requests import players as r_players
+#from app.database.all_requests import matches as r_matches
 
 # Для главного экрана
 admin_buttons = InlineKeyboardMarkup(inline_keyboard=[
