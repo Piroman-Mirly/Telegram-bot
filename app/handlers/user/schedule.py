@@ -15,7 +15,7 @@ from app.states import Admin
 # Импорты из реквестов
 #from app.database.all_requests import clubs as r_clubs
 from app.database.all_requests import players as r_players
-#from app.database.all_requests import matches as r_matches
+from app.database.all_requests import matches as r_matches
 
 router = Router()
 
@@ -31,6 +31,6 @@ async def get_match_schedule(callback: CallbackQuery, state: FSMContext):
     today = date.today()
 
     # Передаются все матчи нужной даты
-    all_matches = await r_players.get_target_date_matches(today)
+    all_matches = await r_matches.get_target_date_matches(today)
     matches_btn = await user_kb.match_schedule(all_matches)
     await callback.message.edit_text('Расписание на сегодня', reply_markup=matches_btn)

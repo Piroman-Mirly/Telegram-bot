@@ -56,7 +56,7 @@ async def handle_return_to_player_mm(callback : CallbackQuery):
     await callback.answer()
     data_player = await r_players.get_statistic_current_player(callback.from_user.id)
     # В будущем переделать на один запрос с JOIN
-    club_name = await r_players.get_club_name(data_player.club_id)
+    club_name = await r_clubs.get_club_name(data_player.club_id)
     # Меняет последний текст бота на статистику игрока.
     await callback.message.edit_text(f'———Главный экран———'
                                      f'\nВаш игровой ник: {data_player.nickname_player}'
