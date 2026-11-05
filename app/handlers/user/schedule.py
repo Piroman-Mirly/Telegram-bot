@@ -32,5 +32,8 @@ async def get_match_schedule(callback: CallbackQuery, state: FSMContext):
 
     # Передаются все матчи нужной даты
     all_matches = await r_matches.get_target_date_matches(today)
+    if not all_matches:
+        await callback.message.edit_text('На сегодня расписания нет', reply_markup=user_kb.schedule_btn)
+        return
     matches_btn = await user_kb.match_schedule(all_matches)
     await callback.message.edit_text('Расписание на сегодня', reply_markup=matches_btn)

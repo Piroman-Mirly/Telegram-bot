@@ -82,7 +82,6 @@ async def get_top_players(category: str = 'total', limit: int = 10):
                     .join(Club, Player.club_id == Club.id)
                     .outerjoin(Statistic_per_match, Player.id == Statistic_per_match.player_id)
                     .group_by(Player.id, Player.nickname_player, Club.name_club)
-                    .order_by(desc("total_points"))
         )
 
         # Выбор, по какой колонке сортировать
@@ -96,6 +95,7 @@ async def get_top_players(category: str = 'total', limit: int = 10):
         # order_map.get(category, desc("total_points")) защищает от опечаток
         # если передашь неизвестную категорию, сортировка будет по общим очкам.
         query = query.order_by(order_map.get(category, desc("total_points")))
+        query = query.limit(limit)
 
         result = await session.execute(query)
         return result.all() # Список кортежей в формате: [(ник, клуб, атака, блок, подача, всего очков)]
