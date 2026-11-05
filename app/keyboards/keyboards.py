@@ -34,6 +34,12 @@ table_button = InlineKeyboardMarkup(inline_keyboard=[
     [InlineKeyboardButton(text='Вернуться в профиль', callback_data='return_to_player_mm'), InlineKeyboardButton(text='Расписание на сегодня', callback_data='schedule_today')]
 ])
 
+# Кнопки расписания
+schedule_btn = InlineKeyboardMarkup(inline_keyboard=[
+    [InlineKeyboardButton(text='Вернуться в профиль', callback_data='return_to_player_mm')],
+    [InlineKeyboardButton(text='Таблица', callback_data='league_table')]
+])
+
 # Кнопки для регистрации
 
 # Кнопки для выбора позиции в регистрации
