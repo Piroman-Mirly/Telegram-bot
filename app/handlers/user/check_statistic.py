@@ -23,23 +23,19 @@ router = Router()
 # Коллбек отвечает за вывод статистики пользователя как игрока
 @router.callback_query(F.data == 'statistic_main_player', StateFilter(Admin.normal))
 async def handle_statistic_main_player(callback: CallbackQuery):
-    # Инициализируем переменные для подсчёта статистики в оперативной памяти
-    point_per_attack = 0
-    point_per_block = 0
-    point_per_serve = 0
 
     # Находим айди пользователя через его тг-айди
     player_id = await r_players.get_player_id(callback.from_user.id)
-    # Данные о всех матчах игрока передаются в переменную
-    all_stat_matches = await r_players.get_all_points_player(player_id)
+    # Данные о всех матчах игрока передаются в переменные
+    point_per_attack, point_per_block, point_per_serve = await r_players.get_all_points_player(player_id)
 
 
 
     await callback.answer()
     await callback.message.edit_text(f'Ваша статистика:'
-                                     f'\nАтака: {all_stat_matches[0]}'
-                                     f'\nБлок: {all_stat_matches[1]}'
-                                     f'\nПодача: {all_stat_matches[2]}', reply_markup=user_kb.return_to_mm)
+                                     f'\nАтака: {point_per_attack}'
+                                     f'\nБлок: {point_per_block}'
+                                     f'\nПодача: {point_per_serve}', reply_markup=user_kb.return_to_mm)
 
 # Колбек отвечает за вывод статистики выбранного пользователем игрока
 # Пока не используется, но в будущем пригодится
