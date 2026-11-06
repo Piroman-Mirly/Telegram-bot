@@ -47,19 +47,15 @@ async def get_statistic_current_player(tg_id):
 # Функция возвращает суммарную статистику игрока
 async def get_all_points_player(player_id):
     async with async_session() as session:
-        # Промежуточный массив, который будет содержать в себе 3 значения: сумма атаки, блока и подач
-        all_point_array = []
-        # Используем айди игрока, чтобы получить данные о всех его матчах
-        sum_attack = select(func.sum(Statistic_per_match.attack_per_match)).where(Statistic_per_match.player_id == player_id)
-        all_point_array.append((await session.execute(sum_attack)).scalar())
-        # Очки за блок
-        sum_block = select(func.sum(Statistic_per_match.block_per_match)).where(Statistic_per_match.player_id == player_id)
-        all_point_array.append((await session.execute(sum_block)).scalar())
-        # Очки за подачу
-        sum_serve = select(func.sum(Statistic_per_match.serve_per_match)).where(Statistic_per_match.player_id == player_id)
-        # Массив со всей суммой очков
-        all_point_array.append((await session.execute(sum_serve)).scalar())
-        return all_point_array
+        query = select(
+            func.coalesce(func.sum(Statistic_per_match.attack_per_match), 0).label("attack"),
+            func.coalesce(func.sum(Statistic_per_match.block_per_match), 0).label("block"),
+            func.coalesce(func.sum(Statistic_per_match.serve_per_match), 0).label("serve")
+        ).where(Statistic_per_match.player_id == player_id)
+
+        result = await session.execute(query)
+        row = result.one()
+        return row[0], row[1], row[2]
 
 # Функция возвращает топ-10 по указанным категориям
 # Всего категорий может быть 4: атака, блок, подача и всего очков
