@@ -10,11 +10,6 @@ async def get_all_clubs():
     async with async_session() as session:
         return (await session.scalars(select(Club))).all()
 
-# Функция возвращает название конкретного клуба
-async def get_name_club(club_id): 
-    async with async_session() as session:
-        return await session.scalar(select(Club.name_club).where(Club.id == club_id))
-
 # Функции, которые возвращают левый и правые айди клубов
 # Домашний клуб (левый)
 async def get_left_club_id(match_id):

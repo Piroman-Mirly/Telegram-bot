@@ -86,8 +86,8 @@ async def claim_right_club(callback: CallbackQuery, state: FSMContext):
     data = await state.get_data()
 
     # Названия двух клубов
-    left_club = await r_clubs.get_name_club(data.get('left_club'))
-    right_club = await r_clubs.get_name_club(data.get('right_club'))
+    left_club = await r_clubs.get_club_name(data.get('left_club'))
+    right_club = await r_clubs.get_club_name(data.get('right_club'))
 
     await callback.message.edit_text(f'Матч создан, проверьте данные:\n\n' \
     f'Дата: {data.get('date')}\n'

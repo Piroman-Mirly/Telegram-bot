@@ -13,6 +13,7 @@ from app.handlers.user.schedule import router as schedule_router
 from app.handlers.user.start import router as start_router
 from app.handlers.user.table import router as table_router
 from app.handlers.user.top_10 import router as top_10_router
+from app.handlers.user.detail_schedule import router as detail_schedule
 
 # Создаем главные роутеры
 user_router = Router(name='user')
@@ -27,6 +28,7 @@ user_router.include_router(check_statistic_router)
 user_router.include_router(table_router)
 user_router.include_router(top_10_router)
 user_router.include_router(schedule_router)
+user_router.include_router(detail_schedule)
 
 # Роутеры админа
 admin_router.include_router(main_admin)

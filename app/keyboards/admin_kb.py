@@ -91,8 +91,8 @@ async def matches(matches):
     all_matches_kb = InlineKeyboardBuilder()
 
     for count, match in enumerate(all_matches, start = 1):
-        left_name_club = await r_clubs.get_name_club(match.left_club_id) # Возвращает имя клуба слева
-        right_name_club = await r_clubs.get_name_club(match.right_club_id) # Возвращает имя клуба справа
+        left_name_club = await r_clubs.get_club_name(match.left_club_id) # Возвращает имя клуба слева
+        right_name_club = await r_clubs.get_club_name(match.right_club_id) # Возвращает имя клуба справа
         all_matches_kb.add(InlineKeyboardButton(text=f'{count}. '
                                                 f'{left_name_club} {match.score_left} - {match.score_right} {right_name_club}',
                                                 callback_data=f'match_{match.id}'))

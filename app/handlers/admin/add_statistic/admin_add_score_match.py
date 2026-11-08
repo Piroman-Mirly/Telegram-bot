@@ -60,7 +60,7 @@ async def pick_left_score(callback: CallbackQuery, state: FSMContext):
     # Получаем данные матча, чтобы узнать имя клуба
     match = await r_matches.get_match_by_id(match_id)
 
-    left_name = await r_clubs.get_name_club(match.left_club_id)
+    left_name = await r_clubs.get_club_name(match.left_club_id)
 
     await callback.message.edit_text(
         f"Матч #{match_id}\nСколько партий взял домашний клуб ({left_name})?",
@@ -79,7 +79,7 @@ async def pick_right_score(callback: CallbackQuery, state: FSMContext):
         await state.update_data(score_left=score)
         
         match = await r_matches.get_match_by_id(match_id)
-        right_name = await r_clubs.get_name_club(match.right_club_id)
+        right_name = await r_clubs.get_club_name(match.right_club_id)
         
         await callback.message.edit_text(
             f"Теперь сколько партий взял гостевой клуб ({right_name})?",
@@ -90,8 +90,8 @@ async def pick_right_score(callback: CallbackQuery, state: FSMContext):
         data = await state.get_data()
         
         match = await r_matches.get_match_by_id(match_id)
-        left_name = await r_clubs.get_name_club(match.left_club_id)
-        right_name = await r_clubs.get_name_club(match.right_club_id)
+        left_name = await r_clubs.get_club_name(match.left_club_id)
+        right_name = await r_clubs.get_club_name(match.right_club_id)
         
         text = (
             f"<b>Проверьте счёт матча:</b>\n"
