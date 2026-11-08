@@ -24,7 +24,8 @@ router = Router()
 @router.callback_query(F.data == 'choice_category_statistic', StateFilter(Admin.normal))
 async def handle_make_choice_category_statistic_top_10_players(callback: CallbackQuery):
     await callback.answer()
-    await callback.message.edit_text('Выберите категорию статистики', reply_markup=user_kb.filter_category)
+    await callback.message.edit_text("🏆 <b>Рейтинг игроков</b>\n\nВыберите категорию, чтобы увидеть лучших:",
+                                    reply_markup=user_kb.filter_category, parse_mode="HTML")
 
 
 

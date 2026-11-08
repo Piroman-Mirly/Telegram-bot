@@ -11,40 +11,43 @@ from app.database.all_requests import clubs as r_clubs
 
 # Кнопки в профиле игрока
 player_kb = InlineKeyboardMarkup(inline_keyboard=[
-    [InlineKeyboardButton(text='Статистика', callback_data='statistic_main_player'), InlineKeyboardButton(text='Топ-10', callback_data='choice_category_statistic'), InlineKeyboardButton(text='Таблица', callback_data='league_table')]
+    [InlineKeyboardButton(text='📊 Статистика', callback_data='statistic_main_player'), InlineKeyboardButton(text='🏆 Топ-10', callback_data='choice_category_statistic'), InlineKeyboardButton(text='📋 Таблица', callback_data='league_table')]
 ])
 
 # Возврат в меню игрока
 return_to_mm = InlineKeyboardMarkup(inline_keyboard=[
-    [InlineKeyboardButton(text='Вернуться в профиль', callback_data='return_to_player_mm')]
+    [InlineKeyboardButton(text='🔙 В профиль', callback_data='return_to_player_mm')]
 ])
 # Возврат к выбору категории статистики или сразу в профиль
 return_to_category_statisitc = InlineKeyboardMarkup(inline_keyboard=[
-    [InlineKeyboardButton(text='Вернуться в профиль', callback_data='return_to_player_mm')],
-    [InlineKeyboardButton(text='К выбору категории', callback_data='choice_category_statistic')]
+    [InlineKeyboardButton(text='🔙 К категориям', callback_data='choice_category_statistic')],
+    [InlineKeyboardButton(text='👤 В профиль', callback_data='return_to_player_mm')]
 ])
 
 # Кнопки для отображения топ-10 игроков
 filter_category = InlineKeyboardMarkup(inline_keyboard=[
-    [InlineKeyboardButton(text='Атака', callback_data='top_attack'), InlineKeyboardButton(text='Блок', callback_data='top_block'), InlineKeyboardButton(text='Подача', callback_data='top_serve'), InlineKeyboardButton(text='Всего', callback_data='top_total')],
-    [InlineKeyboardButton(text='Вернуться в профиль', callback_data='return_to_player_mm')]
+    [InlineKeyboardButton(text='⚔️ Атака', callback_data='top_attack'), InlineKeyboardButton(text='🧱 Блок', callback_data='top_block'), InlineKeyboardButton(text='🎾 Подача', callback_data='top_serve'), InlineKeyboardButton(text='🏆 Всего', callback_data='top_total')],
+    [InlineKeyboardButton(text='🔙 В профиль', callback_data='return_to_player_mm')]
 ])
 
 # Копки в таблице
 table_button = InlineKeyboardMarkup(inline_keyboard=[
-    [InlineKeyboardButton(text='Вернуться в профиль', callback_data='return_to_player_mm'), InlineKeyboardButton(text='Расписание на сегодня', callback_data='schedule_today')]
+    [InlineKeyboardButton(text='📅 Расписание на сегодня', callback_data='schedule_today')],
+    [InlineKeyboardButton(text='🔙 В профиль', callback_data='return_to_player_mm')]
 ])
 
 # Кнопки расписания
 schedule_btn = InlineKeyboardMarkup(inline_keyboard=[
-    [InlineKeyboardButton(text='Вернуться в профиль', callback_data='return_to_player_mm')],
-    [InlineKeyboardButton(text='Таблица', callback_data='league_table')]
+    [InlineKeyboardButton(text='📋 Таблица', callback_data='league_table')],
+    [InlineKeyboardButton(text='👤 В профиль', callback_data='return_to_player_mm')]
+    
 ])
 
 # Кнопки в подробном инфо о матче
 detail_schedule_button = InlineKeyboardMarkup(inline_keyboard=[
-    [InlineKeyboardButton(text='Таблица', callback_data='league_table'), InlineKeyboardButton(text='К расписанию', callback_data='schedule_today')],
-    [InlineKeyboardButton(text='Вернуться в профиль', callback_data='return_to_player_mm')]
+    [InlineKeyboardButton(text='📋 Таблица', callback_data='league_table')],
+    [InlineKeyboardButton(text='📅 К расписанию', callback_data='schedule_today')],
+    [InlineKeyboardButton(text='👤 В профиль', callback_data='return_to_player_mm')]
 ])
 
 # Кнопки для регистрации
@@ -76,6 +79,6 @@ async def match_schedule(matches): # Передается кортеж матч�
         all_matches_kb.add(InlineKeyboardButton(text=f'{match.date_match} '
                                                 f'{left_name_club} - {right_name_club}',
                                                 callback_data=f'match_info_{match.id}'))
-    all_matches_kb.add(InlineKeyboardButton(text='Вернуться в профиль', callback_data='return_to_player_mm'))
-    all_matches_kb.add(InlineKeyboardButton(text='Таблица', callback_data='league_table'))
+    all_matches_kb.add(InlineKeyboardButton(text='📋 Таблица', callback_data='league_table'))
+    all_matches_kb.add(InlineKeyboardButton(text='👤 В профиль', callback_data='return_to_player_mm'))
     return all_matches_kb.adjust(1).as_markup()

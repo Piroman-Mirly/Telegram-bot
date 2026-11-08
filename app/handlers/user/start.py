@@ -37,12 +37,17 @@ async def cmd_start(message: Message, state: FSMContext):
 
     # В будущем переделать на один запрос с JOIN
     club_name = await r_clubs.get_club_name(data_player.club_id)
-    await message.answer(f'———Главный экран———'
-                                     f'\nВаш игровой ник: {data_player.nickname_player}'
-                                     f'\nНазвание клуба: {club_name}'
-                                     f'\nВаша позиция: {data_player.role}'
-                                     f'\nВаш трансферный статус: {data_player.transfer_status}',
-                                     reply_markup=user_kb.player_kb)
+    text = (f'👤 <b>Профиль игрока</b>\n'
+            f'━━━━━━━━━━━━━━━\n'
+            f'<blockquote>'
+            f'Никнейм: {data_player.nickname_player}\n'
+            f'Клуб: {'👕 ' + club_name if data_player.club else "🏳️ Нет клуба"}\n'
+            f'Ваша позиция: 🛡 {data_player.role}\n'
+            f'Ваш трансферный статус: {data_player.transfer_status}'
+            f'</blockquote>')
+
+
+    await message.answer(text, reply_markup=user_kb.player_kb, parse_mode="HTML")
     
 
 # Удаляет все сообщения, написанные в боте
@@ -57,12 +62,17 @@ async def handle_return_to_player_mm(callback : CallbackQuery):
     data_player = await r_players.get_statistic_current_player(callback.from_user.id)
     # В будущем переделать на один запрос с JOIN
     club_name = await r_clubs.get_club_name(data_player.club_id)
-    # Меняет последний текст бота на статистику игрока.
-    await callback.message.edit_text(f'———Главный экран———'
-                                     f'\nВаш игровой ник: {data_player.nickname_player}'
-                                     f'\nНазвание клуба: {club_name}'
-                                     f'\nВаша позиция: {data_player.role}'
-                                     f'\nВаш трансферный статус: {data_player.transfer_status}',
-                                     reply_markup=user_kb.player_kb)
+    # Записываем текст в отдельную переменную, а потом уже используем её вместе со всеми парсерами типа HTML
+    text = (f'👤 <b>Профиль игрока</b>\n'
+            f'━━━━━━━━━━━━━━━\n'
+            f'<blockquote>'
+            f'Никнейм: {data_player.nickname_player}\n'
+            f'Клуб: {'👕 ' + club_name if data_player.club else "🏳️ Нет клуба"}\n'
+            f'Ваша позиция: 🛡 {data_player.role}\n'
+            f'Ваш трансферный статус: {data_player.transfer_status}'
+            f'</blockquote>')
+
+
+    await callback.message.edit_text(text, reply_markup=user_kb.player_kb, parse_mode="HTML")
     
     

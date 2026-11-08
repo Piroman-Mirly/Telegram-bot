@@ -36,5 +36,5 @@ async def get_match_schedule(callback: CallbackQuery, state: FSMContext):
         await callback.message.edit_text('На сегодня расписания нет', reply_markup=user_kb.schedule_btn)
         return
     matches_btn = await user_kb.match_schedule(all_matches)
-    await callback.message.edit_text('Расписание на сегодня.\n' \
-    'Нажмите на матч, чтобы посмотреть детальную информацию о нём', reply_markup=matches_btn)
+    await callback.message.edit_text('📅 <b>Расписание на сегодня</b>\n' \
+    '<i>Нажмите на матч, чтобы посмотреть детальную информацию о нём</i>', reply_markup=matches_btn, parse_mode="HTML")

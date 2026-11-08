@@ -27,7 +27,7 @@ async def handle_table_league(callback: CallbackQuery):
     places_in_table = await r_clubs.get_data_for_table_clubs()
 
     # Отправная точка для создания единого сообщения
-    head = ["Место", "Название", "Кол-во побед", "Кол-во очков"]
+    head = ["#", "Клуб", "В", "О"] # # - Место; Клуб - название клуба; В - кол-во побед; О - кол-во очков
 
     # Итоговое сообщение
     lines = []
