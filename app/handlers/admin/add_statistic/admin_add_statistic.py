@@ -20,43 +20,8 @@ from app.database.all_requests import matches as r_matches
 admin_router = Router()
 
 # Коллбек, который даёт админу выбрать матч для заполнения статистики
-@admin_router.callback_query(F.data == 'on_statistic_for_match')
+@admin_router.callback_query(F.data == 'add_statistic_for_match')
 async def hundle_add_player_statistic(callback: CallbackQuery, state: FSMContext):
-    await state.clear()
-    await state.set_state(Admin.picking_match)
-    await callback.answer()
-
-    # Берёт только незаполненные матчи из БД
-    schedule_matches = await r_matches.schedule_matches()
-
-    buttons = await adm_kb.matches(schedule_matches)
-
-    await callback.message.edit_text('Выберите подходящий матч', reply_markup=buttons)
-
-
-
-# Добавление статистики в конкретный матч
-@admin_router.callback_query(F.data.startswith('match_'), StateFilter(Admin.picking_match))
-async def handle_add_statistic_in_current_match(callback: CallbackQuery, state: FSMContext):
-    await state.set_state(Admin.picking_club)
-    await callback.answer()
-
-    # Достает объекты клубов из айди матча
-    clubs = await r_clubs.get_two_club_id_in_match(int(callback.data.split('_')[-1]))
-
-    # Запоминает айди выбранного матча
-    await state.update_data(match_id = int(callback.data.split('_')[-1]))
-
-    # Кнопки клубов
-    buttons = await adm_kb.clubs(clubs) # Клубы передаются в билдер кнопок
-
-
-    await callback.message.edit_text('Выберите клуб, статистику игроков которых вы желаете внести:', reply_markup=buttons)
-
-# Возврат к выбору клуба
-@admin_router.callback_query(F.data == 'back_to_clubs') 
-async def handle_back_to_clubs(callback: CallbackQuery, state: FSMContext):
-    await state.set_state(Admin.picking_club)
     await callback.answer()
 
     data = await state.get_data()
@@ -73,9 +38,11 @@ async def handle_back_to_clubs(callback: CallbackQuery, state: FSMContext):
     clubs = await r_clubs.get_two_club_id_in_match(match_id)
 
     # Кнопки клубов
-    buttons = await adm_kb.clubs(clubs) # Клубы передаются в билдер кнопок
+    buttons = await adm_kb.clubs(clubs, match_id) # Клубы передаются в билдер кнопок
 
     await callback.message.edit_text('Выберите клуб, статистику игроков которых вы желаете внести:', reply_markup=buttons)
+    await state.set_state(Admin.picking_club)
+    
 
 
 
@@ -249,7 +216,7 @@ async def handle_confirm_stats(callback: CallbackQuery, state: FSMContext):
     succses = await r_players.create_statistic_player(attack, block, serve, player_id, match_id)
     # Проверка на успешную запись данных в БД
     if succses:
-        await callback.message.edit_text('Данные успешно занесены в базу данных', reply_markup=adm_kb.back_to_matches)
+        await callback.message.edit_text('Данные успешно занесены в базу данных', reply_markup=adm_kb.back_to_players)
     else:
         await callback.message.edit_text('Ошибка записи. Попробуйте ещё раз', reply_markup=adm_kb.back_to_players)
 

@@ -9,11 +9,18 @@ from app.database.all_requests import clubs as r_clubs
 #from app.database.all_requests import matches as r_matches
 
 # Для главного экрана
-admin_buttons = InlineKeyboardMarkup(inline_keyboard=[
-    [InlineKeyboardButton(text='Добавить статистику матча', callback_data='on_statistic_for_match')], 
+admin_buttons = InlineKeyboardMarkup(inline_keyboard=[ 
+    [InlineKeyboardButton(text='Добавить данные матча', callback_data='view_all_scheduled_matches')],
     [InlineKeyboardButton(text='Добавить матч', callback_data='add_new_match')], 
-    [InlineKeyboardButton(text='Добавить счёт встречи', callback_data='add_score_match')],
     [InlineKeyboardButton(text='Выйти из админ-панели',callback_data='return_to_player_state')]
+])
+
+# Кнопки в матче
+admin_selected_match = InlineKeyboardMarkup(inline_keyboard=[
+    [InlineKeyboardButton(text='Добавить счёт встречи', callback_data='add_score_match')],
+    [InlineKeyboardButton(text='Добавить статистику игрока', callback_data='add_statistic_for_match')], 
+    [InlineKeyboardButton(text='Закрыть матч для изменения', callback_data='switch_status_to_finished')], 
+    [InlineKeyboardButton(text='В главное меню админ-панели', callback_data='to_mm_admin_panel')]
 ])
 
 # Кнопка для выхода из админ панели
@@ -23,7 +30,7 @@ admin_return_button = InlineKeyboardMarkup(inline_keyboard=[
 
 # Кнопка для возвращения в главный экран админ-панели
 to_mm_admin_panel = InlineKeyboardMarkup(inline_keyboard=[
-    [InlineKeyboardButton(text='Вернуться в главное меню админ-панели', callback_data='to_mm_admin_panel')]
+    [InlineKeyboardButton(text='В главное меню админ-панели', callback_data='to_mm_admin_panel')]
 ])
 
 # Кнопки для возвращения в меню добавления статистики
@@ -33,11 +40,11 @@ back_to_players = InlineKeyboardMarkup(inline_keyboard=[
 ])
 # Вернуться к выбору клубов
 back_to_clubs = InlineKeyboardMarkup(inline_keyboard=[
-    [InlineKeyboardButton(text='К списку клубов', callback_data='back_to_clubs')]
+    [InlineKeyboardButton(text='К списку клубов', callback_data='add_statistic_for_match')]
 ])
 # Вернуться к выбору матчей
 back_to_matches = InlineKeyboardMarkup(inline_keyboard=[
-    [InlineKeyboardButton(text='К списку матчей', callback_data='on_statistic_for_match')]
+    [InlineKeyboardButton(text='К списку матчей', callback_data='add_statistic_for_match')]
 ])
 
 # Кнопка для подтверждения статистики
@@ -53,18 +60,14 @@ confirm_create_match_btn = InlineKeyboardMarkup(inline_keyboard=[
 
 # Билдеры
 # Билдер создает кнопки клубов
-async def clubs(clubs): 
+async def clubs(clubs, match_id): 
     all_clubs = clubs # На вход подаются строки клуба
     all_clubs_kb = InlineKeyboardBuilder()
 
     for club in all_clubs:
         all_clubs_kb.add(InlineKeyboardButton(text=club.name_club, callback_data=f"club_{club.id}"))
-    # Если клуба два, то запрос идёт из админки и нужно дать другую кнопку для возврата в меню
-    if len(clubs) == 2:
-        all_clubs_kb.add(InlineKeyboardButton(text='Назад', callback_data='on_statistic_for_match'))
-    else:
-        # Пока что эта функция используется только в админке, поэтому кнопка "на главную" будет возвращать в меню админки
-        all_clubs_kb.add(InlineKeyboardButton(text='На главную', callback_data='to_mm_admin_panel'))
+
+    all_clubs_kb.add(InlineKeyboardButton(text='К матчу', callback_data=f'match_{match_id}'))
     # Возвращает все клубы в виде кнопок
     return all_clubs_kb.adjust(2).as_markup() # adjust отвечает за то, сколько кнопок будет в одном ряду
 
@@ -73,14 +76,13 @@ async def list_players(players):
     all_players_kb = InlineKeyboardBuilder()
 
     if not players:
-        all_players_kb.button(text="К выбору клубов", callback_data="back_to_clubs")
+        all_players_kb.button(text="К выбору клубов", callback_data="add_statistic_for_match")
         return all_players_kb.as_markup()
 
     for player in players:
         all_players_kb.add(InlineKeyboardButton(text=player.nickname_player, callback_data=f"player_{player.id}"))
     # Возвращает пользователя в меню, где нужно выбирать клубы
-    all_players_kb.add(InlineKeyboardButton(text='К списку клубов', callback_data='back_to_clubs'))
-    all_players_kb.add(InlineKeyboardButton(text='На главную', callback_data='on_statistic_for_match'))
+    all_players_kb.add(InlineKeyboardButton(text='К списку клубов', callback_data='add_statistic_for_match'))
     
     # Возвращает всех игроков в клубе в виде кнопок
     return all_players_kb.adjust(1).as_markup()

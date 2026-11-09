@@ -1,9 +1,9 @@
 from app.database.models import async_session
-from app.database.models import Player, Club, Statistic_per_match
+from app.database.models import Player, Club, Statistic_per_match, Match
 #from sqlalchemy.exc import IntegrityError
 #from datetime import datetime, date
 
-from sqlalchemy import select, func, desc
+from sqlalchemy import select, func, desc, or_, distinct
 
 
 # Извлекает имя игрока из БД с помощью его айди
@@ -96,3 +96,29 @@ async def get_top_players(category: str = 'total', limit: int = 10):
         result = await session.execute(query)
         return result.all() # Список кортежей в формате: [(ник, клуб, атака, блок, подача, всего очков)]
 
+# Возвращает два значения: кол-во игроков с заполненной статистикой и общее кол-во игроков в матче
+async def get_all_count_players(match_id):
+    async with async_session() as session:
+        # Узнаем данные матча
+        match = await session.get(Match, match_id)
+
+        if not match:
+            return 0, 0
+
+        # Общее кол-во игроков в клубе
+        total_query = select(func.count(Player.id)).where(
+            or_(
+                Player.club_id == match.left_club_id,
+                Player.club_id == match.right_club_id
+            )
+        )
+        total_players = await session.scalar(total_query) or 0
+
+        # Игроки с заполненной статистикой без дупликатов
+        filled_query = select(
+            func.count(func.distinct(Statistic_per_match.player_id))
+        ).where(Statistic_per_match.match_id == match_id)
+
+        filled_players = await session.scalar(filled_query) or 0
+
+        return filled_players, total_players
