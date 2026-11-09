@@ -21,7 +21,6 @@ async def update_match_score(match_id: int, score_left: int, score_right: int, w
         query = (update(Match).where(Match.id == match_id)
                  .values(score_left = score_left,
                          score_right = score_right,
-                         winner_id = winner_id,
-                         status = 'finished'))
+                         winner_id = winner_id))
         await session.execute(query)
         await session.commit()

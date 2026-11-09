@@ -42,10 +42,7 @@ back_to_players = InlineKeyboardMarkup(inline_keyboard=[
 back_to_clubs = InlineKeyboardMarkup(inline_keyboard=[
     [InlineKeyboardButton(text='К списку клубов', callback_data='add_statistic_for_match')]
 ])
-# Вернуться к выбору матчей
-back_to_matches = InlineKeyboardMarkup(inline_keyboard=[
-    [InlineKeyboardButton(text='К списку матчей', callback_data='add_statistic_for_match')]
-])
+
 
 # Кнопка для подтверждения статистики
 succses_statistic = InlineKeyboardMarkup(inline_keyboard=[
@@ -108,6 +105,14 @@ def set_score_kb(match_id : int, side: str, club_name : str):
     kb.button(text=f"{club_name} — 2 партии", callback_data=f"setscore_{match_id}_{side}_2")
     kb.button(text=f"{club_name} — 3 партии", callback_data=f"setscore_{match_id}_{side}_3")
     
-    kb.button(text="Назад к выбору матча", callback_data="add_score_match")
+    kb.button(text="Назад к матчу", callback_data=f"match_{match_id}")
+    kb.adjust(1)
+    return kb.as_markup()
+
+
+# Билдер для возврата в карточку матча
+async def back_to_matches(match_id: int):
+    kb = InlineKeyboardBuilder()
+    kb.add(InlineKeyboardButton(text='К матчу', callback_data=f'match_{match_id}'))
     kb.adjust(1)
     return kb.as_markup()
