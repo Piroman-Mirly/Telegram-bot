@@ -20,7 +20,7 @@ admin_selected_match = InlineKeyboardMarkup(inline_keyboard=[
     [InlineKeyboardButton(text='Добавить счёт встречи', callback_data='add_score_match')],
     [InlineKeyboardButton(text='Добавить статистику игрока', callback_data='add_statistic_for_match')], 
     [InlineKeyboardButton(text='Закрыть матч для изменения', callback_data='switch_status_to_finished')], 
-    [InlineKeyboardButton(text='В главное меню админ-панели', callback_data='to_mm_admin_panel')]
+    [InlineKeyboardButton(text='К матчам', callback_data='view_all_scheduled_matches'), InlineKeyboardButton(text='В меню', callback_data='to_mm_admin_panel')]
 ])
 
 # Кнопка для выхода из админ панели
@@ -56,6 +56,13 @@ confirm_create_match_btn = InlineKeyboardMarkup(inline_keyboard=[
 ])
 
 # Билдеры
+# Билдер, который спрашивает, уверен ли пользователь в том, чтобы изменить статус текущему матчу
+async def confirm_switch_matched(match_id):
+    kb = InlineKeyboardBuilder()
+    kb.add(InlineKeyboardButton(text='Подтвердить', callback_data="switch_status_current_match"))
+    kb.add(InlineKeyboardButton(text='Назад', callback_data=f"match_{match_id}"))
+    return kb.adjust(1).as_markup()
+
 # Билдер создает кнопки клубов
 async def clubs(clubs, match_id): 
     all_clubs = clubs # На вход подаются строки клуба
