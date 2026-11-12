@@ -40,12 +40,13 @@ async def pick_left_score(callback: CallbackQuery, state: FSMContext):
 # Для клуба, играющего на выезде
 @admin_router.callback_query(F.data.startswith('setscore_'))
 async def pick_right_score(callback: CallbackQuery, state: FSMContext):
-    await callback.answer()
+
     _, match_id, side, score = callback.data.split('_')
     match_id = int(match_id)
     score = int(score)
     
     if side == "left":
+        await callback.answer()
         await state.update_data(score_left=score)
         
         match = await r_matches.get_match_by_id(match_id)
@@ -58,6 +59,15 @@ async def pick_right_score(callback: CallbackQuery, state: FSMContext):
     else: # Подтверждение счёта, если: side == "right"
         await state.update_data(score_right=score)
         data = await state.get_data()
+
+        # Безопасно достаем значение (если его нет, вернется None)
+        score_left = data.get('score_left')
+        score_right = data.get('score_right')
+
+        if score_left is not None and score_left == score_right:
+            await callback.answer("❌ В волейболе не может быть ничьей! Счёт по партиям должен быть разным.", 
+            show_alert=True)
+            return
         
         match = await r_matches.get_match_by_id(match_id)
         left_name = await r_clubs.get_club_name(match.left_club_id)
