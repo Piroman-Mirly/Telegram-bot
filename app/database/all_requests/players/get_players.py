@@ -47,11 +47,14 @@ async def get_statistic_current_player(tg_id):
 # Функция возвращает суммарную статистику игрока
 async def get_all_points_player(player_id):
     async with async_session() as session:
-        query = select(
+        query = (select(
             func.coalesce(func.sum(Statistic_per_match.attack_per_match), 0).label("attack"),
             func.coalesce(func.sum(Statistic_per_match.block_per_match), 0).label("block"),
             func.coalesce(func.sum(Statistic_per_match.serve_per_match), 0).label("serve")
-        ).where(Statistic_per_match.player_id == player_id)
+        ).join(Match, Statistic_per_match.match_id == Match.id)
+        .where(Statistic_per_match.player_id == player_id)
+        .where(Match.status == 'finished')
+        )
 
         result = await session.execute(query)
         row = result.one()
@@ -122,3 +125,4 @@ async def get_all_count_players(match_id):
         filled_players = await session.scalar(filled_query) or 0
 
         return filled_players, total_players
+
