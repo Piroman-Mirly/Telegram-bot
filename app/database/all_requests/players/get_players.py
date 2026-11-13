@@ -3,7 +3,7 @@ from app.database.models import Player, Club, Statistic_per_match, Match
 #from sqlalchemy.exc import IntegrityError
 #from datetime import datetime, date
 
-from sqlalchemy import select, func, desc, or_, distinct
+from sqlalchemy import select, func, desc, or_, distinct, and_
 
 
 # Извлекает имя игрока из БД с помощью его айди
@@ -70,6 +70,9 @@ async def get_top_players(category: str = 'total', limit: int = 10):
             func.coalesce(func.sum(Statistic_per_match.serve_per_match), 0)
         )
 
+        # Подзапрос со списком ID завершенных матчей
+        finished_matches_subq = select(Match.id).where(Match.status == 'finished')
+
         query = (
             select(Player.nickname_player, Club.name_club,
                    func.coalesce(func.sum(Statistic_per_match.attack_per_match), 0).label("attack"),
@@ -79,7 +82,13 @@ async def get_top_players(category: str = 'total', limit: int = 10):
                    )
                     # Соединяем таблицу клубов (Player.club_id == Club.id)
                     .join(Club, Player.club_id == Club.id)
-                    .outerjoin(Statistic_per_match, Player.id == Statistic_per_match.player_id)
+                    # С помощью подзапроса считаем только статистику завершенных матчей
+                    .outerjoin(
+                        Statistic_per_match, 
+                        and_(Player.id == Statistic_per_match.player_id,
+                             Statistic_per_match.match_id.in_(finished_matches_subq)
+                             )
+                        )
                     .group_by(Player.id, Player.nickname_player, Club.name_club)
         )
 
