@@ -20,7 +20,7 @@ from app.database.all_requests import matches as r_matches
 
 router = Router()
 
-@router.callback_query(F.data.startswith('match_info_'), StateFilter(Admin.normal))
+@router.callback_query(F.data.startswith('schedule_match_info_'), StateFilter(Admin.normal))
 async def handle_show_match_details(callback: CallbackQuery, state: FSMContext):
     await callback.answer()
 

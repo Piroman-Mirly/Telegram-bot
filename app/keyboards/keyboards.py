@@ -78,7 +78,7 @@ async def match_schedule(matches): # Передается кортеж матч�
         right_name_club = await r_clubs.get_club_name(match.right_club_id) # Возвращает имя клуба справа
         all_matches_kb.add(InlineKeyboardButton(text=f'{match.date_match} '
                                                 f'{left_name_club} - {right_name_club}',
-                                                callback_data=f'match_info_{match.id}'))
+                                                callback_data=f'schedule_match_info_{match.id}'))
     all_matches_kb.add(InlineKeyboardButton(text='📋 Таблица', callback_data='league_table'))
     all_matches_kb.add(InlineKeyboardButton(text='👤 В профиль', callback_data='return_to_player_mm'))
     return all_matches_kb.adjust(1).as_markup()

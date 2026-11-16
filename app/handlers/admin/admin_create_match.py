@@ -75,7 +75,7 @@ async def claim_right_club(callback: CallbackQuery, state: FSMContext):
 
     # Если первый и второй клуб похожи, то будет выведена ошибка
     if data.get('left_club') == club_id:
-        buttons_clubs = await adm_kb.clubs(await r_clubs.get_all_clubs())
+        buttons_clubs = await adm_kb.clubs_for_admin(await r_clubs.get_all_clubs())
         await callback.message.edit_text('Один и тот же клуб не может играть против себя!\n' \
         'Выберите первый клуб ещё раз', reply_markup=buttons_clubs)
         await state.set_state(Admin.choice_left_club)
