@@ -42,7 +42,7 @@ async def handle_get_date_match(message: Message, state: FSMContext):
     # Сохранение данных в оперативную память FSM состояний
     await state.update_data(date = match_date)
     await state.set_state(Admin.choice_left_club)
-    buttons_clubs = await adm_kb.clubs(await r_clubs.get_all_clubs())
+    buttons_clubs = await adm_kb.clubs_for_admin(await r_clubs.get_all_clubs())
     await message.answer('Выберите клуб, который играл на домашнем поле', reply_markup=buttons_clubs)
 
 
