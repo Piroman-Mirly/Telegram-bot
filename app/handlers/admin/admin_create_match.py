@@ -57,7 +57,7 @@ async def trap_left_club(message: Message, state: FSMContext):
 async def claim_left_club(callback: CallbackQuery, state: FSMContext):
     await callback.answer()
 
-    buttons_clubs = await adm_kb.clubs(await r_clubs.get_all_clubs())
+    buttons_clubs = await adm_kb.clubs_for_admin(await r_clubs.get_all_clubs())
     club_id = int(callback.data.split("_")[1])
     await state.update_data(left_club=club_id)
     await callback.message.edit_text('Первый клуб выбран, теперь выберите второй', reply_markup=buttons_clubs)
