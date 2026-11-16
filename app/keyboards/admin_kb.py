@@ -64,6 +64,14 @@ async def confirm_switch_matched(match_id):
     return kb.adjust(1).as_markup()
 
 # Билдер создает кнопки клубов
+async def clubs_for_admin(clubs):
+    all_clubs = clubs
+    all_clubs_kb = InlineKeyboardBuilder()
+    for club in all_clubs:
+        all_clubs_kb.add(InlineKeyboardButton(text=club.name_club, callback_data=f"club_{club.id}"))
+    all_clubs_kb.add(InlineKeyboardButton(text='В меню', callback_data="add_new_match"))
+    return all_clubs_kb.adjust(2).as_markup()
+    
 async def clubs(clubs, match_id): 
     all_clubs = clubs # На вход подаются строки клуба
     all_clubs_kb = InlineKeyboardBuilder()
