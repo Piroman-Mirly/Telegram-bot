@@ -1,5 +1,5 @@
 from app.database.models import async_session
-from app.database.models import Player, Statistic_per_match
+from app.database.models import Player, Statistic_per_match, User
 from sqlalchemy.exc import IntegrityError
 #from datetime import datetime, date
 
@@ -10,6 +10,18 @@ async def create_player(tg_id: int, nickname: str, role: str):
     async with async_session() as session:
         player = Player(telegram_id=tg_id, nickname_player=nickname, role=role)
         session.add(player)
+        # Попытка записать. Если ошибка, то гг :(
+        try:
+            await session.commit()
+            return True
+        except IntegrityError:
+            await session.rollback()
+            return False
+
+async def create_user(tg_id: int, user_id: str):
+    async with async_session() as session:
+        user = User(telegram_id=tg_id, username=user_id)
+        session.add(user)
         # Попытка записать. Если ошибка, то гг :(
         try:
             await session.commit()
@@ -45,3 +57,10 @@ async def create_statistic_player(attack: int, block: int, serve: int, player_id
         except IntegrityError:
             await session.rollback()  
             return False
+
+# Меняем роль обычного юзера
+async def change_user_role(tg_id: int, new_role: str):
+    async with async_session as session:
+        query = update(User).where(User.telegram_id == tg_id).values(role=new_role)
+        await session.execute(query)
+        await session.commit()
