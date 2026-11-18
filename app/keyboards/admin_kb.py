@@ -131,3 +131,11 @@ async def back_to_matches(match_id: int):
     kb.add(InlineKeyboardButton(text='К матчу', callback_data=f'match_{match_id}'))
     kb.adjust(1)
     return kb.as_markup()
+
+
+# Билдер для принятия решений насчёт игроков
+def application_kb(tg_id: int):
+    kb = InlineKeyboardBuilder()
+    kb.button(text='✅ Одобрить', callback_data=f'approve_{tg_id}')
+    kb.button(text='❌ Отклонить', callback_data=f'reject_{tg_id}')
+    return kb.as_markup()
