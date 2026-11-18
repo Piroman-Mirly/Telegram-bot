@@ -60,7 +60,7 @@ async def save_data(message: Message, state: FSMContext):
     succses = await r_players.create_player(data['tg_id'], data['nickname'], data['role'])
     if succses:
         await message.answer(
-            f"Готово! Ник: {data['nickname']}, позиция: {data['role']}",
+            f"Готово! Ник: {data['nickname']}, позиция: {data['role']}. Чтобы пользоваться ботом, перезапустите его командой /start",
             reply_markup=ReplyKeyboardRemove()
         )
         await state.clear()
