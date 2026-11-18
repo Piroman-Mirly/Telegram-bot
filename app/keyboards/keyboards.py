@@ -65,6 +65,13 @@ confirm_reg_kb = ReplyKeyboardMarkup(keyboard=[
     [KeyboardButton(text="Отмена")]
 ])
 
+# Кнопки юзера
+# Кнопки для подачи заявки на вступление, или же просмотр каких-либо активностей
+appky_player_kb = InlineKeyboardMarkup(inline_keyboard=[
+    [InlineKeyboardButton(text='🏆 Топ-10', callback_data='choice_category_statistic'), InlineKeyboardButton(text='📋 Таблица', callback_data='league_table')],
+    [InlineKeyboardButton(text='📝 Подать заявку на вступление', callback_data='apply_for_player')]
+])
+
 
 # Билдеры
 
