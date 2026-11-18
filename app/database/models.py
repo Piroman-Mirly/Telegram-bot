@@ -87,7 +87,11 @@ class User(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
 
     telegram_id: Mapped[int] = mapped_column(BigInteger, nullable=False)
-    username: Mapped[str] = mapped_column(String(255), nullable=False) # Как юсер подписан в тг
+    username: Mapped[str] = mapped_column(String(255), nullable=True) # Как юсер подписан в тг
+    
+    # Роли: "guest" (обычный юзер), "player" (игрок), "admin" (судья)
+    role: Mapped[str] = mapped_column(String(20), default="guest", nullable=False)
+    
 
 async def async_main():
     async with engine.begin() as conn:
