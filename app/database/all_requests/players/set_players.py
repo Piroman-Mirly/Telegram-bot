@@ -60,7 +60,7 @@ async def create_statistic_player(attack: int, block: int, serve: int, player_id
 
 # Меняем роль обычного юзера
 async def change_user_role(tg_id: int, new_role: str):
-    async with async_session as session:
+    async with async_session() as session:
         query = update(User).where(User.telegram_id == tg_id).values(role=new_role)
         await session.execute(query)
         await session.commit()

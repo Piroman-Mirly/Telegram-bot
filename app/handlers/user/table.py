@@ -41,7 +41,12 @@ async def handle_table_league(callback: CallbackQuery):
 
     # Считаем максимальную ширину каждой колонки
     # Читается как: максимум по всем строкам длины i-й ячейки
-    widths = [max(len(head[i]), max(len(line[i]) for line in lines)) for i in range(len(head))]
+
+    widths = [
+    max(len(head[i]), max((len(line[i]) for line in lines), default=0))
+    for i in range(len(head))
+]
+        
 
     # Функция форматирования строки с отступом
     def format_lines(cells):

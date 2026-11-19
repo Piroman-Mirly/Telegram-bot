@@ -1,5 +1,5 @@
 from app.database.models import async_session
-from app.database.models import Player, Club, Statistic_per_match, Match
+from app.database.models import Player, Club, Statistic_per_match, Match, User
 #from sqlalchemy.exc import IntegrityError
 #from datetime import datetime, date
 
@@ -135,3 +135,8 @@ async def get_all_count_players(match_id):
 
         return filled_players, total_players
 
+# Возвращает юзера по его айди
+async def get_user(user_id):
+    async with async_session() as session:
+        user = await session.scalar(select(User).where(User.telegram_id == user_id))
+        return user
