@@ -1,5 +1,5 @@
-from sqlalchemy import BigInteger, String, ForeignKey, Date
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+from sqlalchemy import BigInteger, String, ForeignKey, Date, event
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship, Session
 from sqlalchemy.ext.asyncio import AsyncAttrs, async_sessionmaker, create_async_engine
 
 from datetime import date 
@@ -20,10 +20,12 @@ class Player(Base):
     telegram_id: Mapped[int] = mapped_column(BigInteger, nullable=False) # Телеграм айди игрока
     nickname_player: Mapped[str] = mapped_column(String(50), unique=True, nullable=False) # Игровой ник
     role: Mapped[str] = mapped_column(String(25), nullable=False) # Позиция на поле
-    transfer_status: Mapped[str] = mapped_column(String(32), default="Свободный агент", nullable=True) # Трансферный статус
+    transfer_status: Mapped[str] = mapped_column(String(32), default="Свободный агент", nullable=False) # Трансферный статус
     club_id: Mapped[int | None] = mapped_column(ForeignKey('clubs.id'), nullable=True) # Внешний ключ от клуба
 
     club: Mapped["Club"] = relationship( back_populates='players', lazy='selectin') # Связь игрока с клубом
+    
+    
 
 # Таблица со всеми клубами
 class Club(Base):
@@ -92,6 +94,15 @@ class User(Base):
     # Роли: "guest" (обычный юзер), "player" (игрок), "admin" (судья)
     role: Mapped[str] = mapped_column(String(20), default="guest", nullable=False)
     
+# Функция для изменения трансферного статуса игрока в зависимости от наличия клуба
+@event.listens_for(Session, "before_flush")
+def _sync_transfer_statuses(session, flush_context, instances):
+    for obj in list(session.new) + list(session.dirty):
+        if isinstance(obj, Player):
+            correct = "Свободный агент" if obj.club_id is None else "В клубе"
+            if obj.transfer_status != correct:
+                obj.transfer_status = correct
+
 
 async def async_main():
     async with engine.begin() as conn:
