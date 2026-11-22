@@ -6,7 +6,7 @@ from aiogram.fsm.context import FSMContext
 
 # Импорты из самого бота
 import app.keyboards.admin_kb as adm_kb
-import app.keyboards.keyboards as user_kb
+import app.keyboards.players_kb as player_kb
 from app.states import Admin
 from config import ADMIN
 
@@ -37,7 +37,7 @@ async def handle_out_of_admin_panel(callback: CallbackQuery, state: FSMContext):
     await state.set_state(Admin.normal)
     await callback.answer()
     await callback.message.edit_text('Вы вышли из админ-панели\n'
-    'Нажмите кнопку, чтобы использовать бота как обычный пользователь', reply_markup=user_kb.return_to_mm)
+    'Нажмите кнопку, чтобы использовать бота как обычный пользователь', reply_markup=player_kb.return_to_mm)
 
 @admin_router.callback_query(F.data.startswith('approve_'))
 async def handle_approve_user(callback: CallbackQuery):

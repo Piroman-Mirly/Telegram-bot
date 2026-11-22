@@ -12,7 +12,8 @@ from app.middlewares import TestMiddleware
 from app.database.all_requests import players as r_players
 #from app.database.all_requests import matches as r_matches
 
-import app.keyboards.keyboards as user_kb
+import app.keyboards.players_kb as player_kb
+import app.keyboards.users_kb as user_kb
 from app.states import Admin
 
 router = Router()
@@ -21,17 +22,25 @@ router = Router()
 
 
 # Колбек, который переносит пользователя в окно выбора категории для показа статистики топ-10
-@router.callback_query(F.data == 'choice_category_statistic', StateFilter(Admin.normal))
-async def handle_make_choice_category_statistic_top_10_players(callback: CallbackQuery):
+@router.callback_query(F.data == 'choice_category_statistic')
+async def handle_make_choice_category_statistic_top_10_players(callback: CallbackQuery, state: FSMContext):
     await callback.answer()
+    # Подставляем в переменную нужные кнопки (для игрока или для обычного пользователя)
+    user = await r_players.get_user(callback.from_user.id)
+    
+    if user.role == "player":
+        kb = player_kb.filter_category
+    else:
+        kb = user_kb.filter_category
+    
     await callback.message.edit_text("🏆 <b>Рейтинг игроков</b>\n\nВыберите категорию, чтобы увидеть лучших:",
-                                    reply_markup=user_kb.filter_category, parse_mode="HTML")
+                                    reply_markup=kb, parse_mode="HTML")
 
 
 
 # Колбек отвечает за вывод статистики всех игроков
-@router.callback_query(F.data.startswith("top_"), StateFilter(Admin.normal))
-async def handle_top_players_statistic(callback: CallbackQuery):
+@router.callback_query(F.data.startswith("top_"))
+async def handle_top_players_statistic(callback: CallbackQuery, state: FSMContext):
     await callback.answer()
 
     # Из callback'а достаём категорию: "top_attack" → "attack"
@@ -49,7 +58,14 @@ async def handle_top_players_statistic(callback: CallbackQuery):
     }
     # Если нет статистики, то бот предупредит
     if not top:
-        await callback.message.edit_text("Статистики пока нет.", reply_markup=user_kb.return_to_mm)
+        # Подставляем в переменную нужные кнопки (для игрока или для обычного пользователя)
+        user = await r_players.get_user(callback.from_user.id)
+        
+        if user.role == "player":
+            kb = player_kb.return_to_mm
+        else:
+            kb = user_kb.return_to_mm
+        await callback.message.edit_text("Статистики пока нет.", reply_markup=kb)
         return
 
     # Создается текст для вывода топ-10
@@ -69,9 +85,17 @@ async def handle_top_players_statistic(callback: CallbackQuery):
             f"   ⚔️ {attack} | 🧱 {block} | 🎾 {serve} | 🏆 {total}"
         )
 
+    # Подставляем в переменную нужные кнопки (для игрока или для обычного пользователя)
+    user = await r_players.get_user(callback.from_user.id)
+    
+    if user.role == "player":
+        kb = player_kb.return_to_category_statisitc
+    elif state == Admin.user:
+        kb = user_kb.return_to_category_statisitc
+        
     await callback.message.edit_text(
         "\n".join(lines),
-        reply_markup=user_kb.return_to_category_statisitc,
+        reply_markup=kb,
         parse_mode="HTML",
     )
 

@@ -10,7 +10,8 @@ from datetime import date
 from app.middlewares import TestMiddleware
 #import app.database.requests as request
 
-import app.keyboards.keyboards as user_kb
+import app.keyboards.players_kb as player_kb
+import app.keyboards.users_kb as user_kb
 from app.states import Admin
 
 # Импорты из реквестов
@@ -20,7 +21,7 @@ from app.database.all_requests import matches as r_matches
 
 router = Router()
 
-@router.callback_query(F.data.startswith('schedule_match_info_'), StateFilter(Admin.normal))
+@router.callback_query(F.data.startswith('schedule_match_info_'))
 async def handle_show_match_details(callback: CallbackQuery, state: FSMContext):
     await callback.answer()
 
@@ -30,8 +31,15 @@ async def handle_show_match_details(callback: CallbackQuery, state: FSMContext):
     # 1) Получаем данные матча
     match = await r_matches.get_match_by_id(match_id)
 
+    # Подставляем в переменную нужные кнопки (для игрока или для обычного пользователя)
+    user = await r_players.get_user(callback.from_user.id)
+    
+    if user.role == "player":
+        kb = player_kb.detail_schedule_button
+    else:
+        kb = user_kb.detail_schedule_button
     if not match:
-        await callback.message.edit_text('Матч не найден', reply_markup=user_kb.detail_schedule_button)
+        await callback.message.edit_text('Матч не найден', reply_markup=kb)
         return
     
     # 2) Получаем названия клубов
@@ -68,7 +76,7 @@ async def handle_show_match_details(callback: CallbackQuery, state: FSMContext):
     # 5) Отправка сообщения 
     await callback.message.edit_text(
         text, 
-        reply_markup=user_kb.detail_schedule_button, # Кнопка "Назад к расписанию"
+        reply_markup=kb,
         parse_mode="HTML"
     )
 

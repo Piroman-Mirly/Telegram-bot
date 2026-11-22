@@ -3,7 +3,7 @@ from aiogram.filters import CommandStart, Command, StateFilter
 from aiogram.types import Message, CallbackQuery, ReplyKeyboardRemove
 from aiogram.fsm.context import FSMContext
 
-import app.keyboards.keyboards as kb
+import app.keyboards.players_kb as kb
 from app.states import Registration
 
 # Импорты из реквестов

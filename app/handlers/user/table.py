@@ -3,16 +3,17 @@ import logging
 from aiogram import F, Router
 from aiogram.filters import StateFilter
 from aiogram.types import CallbackQuery
-#from aiogram.fsm.context import FSMContext
+from aiogram.fsm.context import FSMContext
 
 from app.middlewares import TestMiddleware
 
 # Импорты из реквестов
 from app.database.all_requests import clubs as r_clubs
-#from app.database.all_requests import players as r_players
+from app.database.all_requests import players as r_players
 #from app.database.all_requests import matches as r_matches
 
-import app.keyboards.keyboards as user_kb
+import app.keyboards.players_kb as player_kb
+import app.keyboards.users_kb as user_kb
 from app.states import Admin
 
 router = Router()
@@ -20,9 +21,17 @@ router = Router()
 
 
 # Коллбек отвечает за отрисовку таблицы в отсортированном виде
-@router.callback_query(F.data == "league_table", StateFilter(Admin.normal))
-async def handle_table_league(callback: CallbackQuery):
+@router.callback_query(F.data == "league_table")
+async def handle_table_league(callback: CallbackQuery, state: FSMContext):
     await callback.answer()
+    # Передаются нужные кнопки в зависимости от статуса пользователя
+    user = await r_players.get_user(callback.from_user.id)
+    
+    if user.role == 'player':
+        kb = player_kb.table_button
+    else:
+        kb = user_kb.table_button
+    
     # Из файла request данные о текущих местах клуба передаются в переменную
     places_in_table = await r_clubs.get_data_for_table_clubs()
 
@@ -45,7 +54,7 @@ async def handle_table_league(callback: CallbackQuery):
     widths = [
     max(len(head[i]), max((len(line[i]) for line in lines), default=0))
     for i in range(len(head))
-]
+    ]
         
 
     # Функция форматирования строки с отступом
@@ -60,5 +69,5 @@ async def handle_table_league(callback: CallbackQuery):
     # Разделяем итоговый массив "переходом на новую строку" (\n)
     message = "<pre>" + "\n".join(all_lines) + "</pre>"
 
-    await callback.message.edit_text(message, reply_markup=user_kb.table_button, parse_mode="HTML")
+    await callback.message.edit_text(message, reply_markup=kb, parse_mode="HTML")
 

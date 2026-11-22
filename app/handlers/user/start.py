@@ -15,7 +15,8 @@ from app.database.all_requests import clubs as r_clubs
 from app.database.all_requests import players as r_players
 from app.database.all_requests import matches as r_matches
 
-import app.keyboards.keyboards as user_kb
+import app.keyboards.players_kb as player_kb
+import app.keyboards.users_kb as user_kb
 import app.keyboards.admin_kb as adm_kb
 from app.states import Admin, Registration
 
@@ -37,10 +38,10 @@ async def cmd_start(message: Message, state: FSMContext):
     # Если нет, то регистрируем
     if not user:
         await r_players.create_user(tg_id, username)
-        await message.answer("Привет! Вы находитесь в гостевом режиме.", reply_markup=user_kb.appky_player_kb)
+        await message.answer("Привет! Вы находитесь в гостевом режиме.", reply_markup=user_kb.main_player_kb)
         return
     elif user.role == "guest": # Если он гость, то также выводим пользовательский интерфейс
-        await message.answer("Привет! Вы находитесь в гостевом режиме.", reply_markup=user_kb.appky_player_kb)
+        await message.answer("Привет! Вы находитесь в гостевом режиме.", reply_markup=user_kb.main_player_kb)
         return
         
 
@@ -65,11 +66,14 @@ async def cmd_start(message: Message, state: FSMContext):
             f'</blockquote>')
 
 
-    await message.answer(text, reply_markup=user_kb.player_kb, parse_mode="HTML")
+    await message.answer(text, reply_markup=player_kb.player_kb, parse_mode="HTML")
 
 
 # Удаляет все сообщения, написанные в боте
 @router.message(Admin.normal)
+async def delete_all_message(message: Message, state: FSMContext):
+    await message.delete()
+@router.message(Admin.user)
 async def delete_all_message(message: Message, state: FSMContext):
     await message.delete()
 
@@ -91,7 +95,14 @@ async def handle_return_to_player_mm(callback : CallbackQuery):
             f'</blockquote>')
 
 
-    await callback.message.edit_text(text, reply_markup=user_kb.player_kb, parse_mode="HTML")
+    await callback.message.edit_text(text, reply_markup=player_kb.player_kb, parse_mode="HTML")
+
+# Главный экран обычного пользователя
+@router.callback_query(F.data == "return_to_user_mm")
+async def handle_user_mm(callback: CallbackQuery):
+    await callback.answer()
+    await callback.message.edit_text("Вы находитесь в гостевом режиме.", reply_markup=user_kb.main_player_kb)
+    
     
 
 # Хендлер для отправки запроса на становление игрока
